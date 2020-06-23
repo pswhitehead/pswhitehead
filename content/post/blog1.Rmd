@@ -1,0 +1,87 @@
+---
+title: "HMDA Loan Application -- A SQL demo"
+tags: ['SQL', 'R', 'Postgres', 'HMDA', 'linear model']
+draft: true
+---
+
+# Today's topic
+Today we are going to use this HMDA loan application data to look at the relationship between different demographic features of borrowers when applying for a loan, and how that impacts eventual loan acceptance or denial in 2008. We are also going to look at how these demographic factors interact with different reasons given for loan denial. Before we begin, this is just a quick example of using SQL databases in your analysis pipelines, so while we are looking at real data about real people, other researchers and scholars have done a lot more complex and interesting work on this topic and I encourage you to check them out ([click here for reading list](#reading-list)).
+
+The three questions we are going to look at with this dataset are:
+1. In Durham County, NC, does an applicant's race affect loan denial rates, when no reason for denial is given?
+2. In Durham County, NC, is the income of accepted loan applications different based on race?
+
+## Question 1
+
+### Step 1
+First we need to connect our R notebook to the local SQL database. Thankfully, with the `RPostgres` and `DBI` packages, it is exceedingly simple to connect to it in R. 
+```{r, warning = FALSE, message = FALSE}
+#I always try to load all the packages I expect to use first and try to properly set up my R environment
+library(DBI) #load the database interface package
+library(dplyr) #load dplyr for later
+
+#all the below settings can be changed to work with cloud databases as well
+con <- dbConnect(RPostgres::Postgres(), #you'll need RPostgres package to get R to talk with PostgreSQL
+                 dbname = 'mortgages', #this is database I created
+                 host = 'localhost', #currently I have this saved on my local machine
+                 port = 5432, #localport
+                 user = 'postgres')
+```
+
+#### Step 2
+Now that we are connected to the database, we can send SQL queries in R either through code chunks or sending commands in R code chunks using `tbl()`. I'm going to opt for the former, because I like to keep my languages seperate in my notebooks, as much as possible. 
+
+In this first query, we are going pull data for the primary applicant's race, what action was taken on the loan application, and then see the percent of applicantions that ended in each action by race, and only when there was no reason given for denial, if an application was eventually denied. 
+
+As a quick technical note for the code, make sure the code chunk header looks like this: `{sql, connection=con, output.var="df.q1"}`. Here I have connected the code chunk to the database variable, and then I save the output of the SQL query to a variable I can plot later in `ggplot2`.
+```{sql, connection=con, output.var="df.q1"}
+SELECT RACE1, ACTIONTYPE, 
+      COUNT(*) * 100.0 / SUM(COUNT(*)) OVER(PARTITION BY RACE1) AS Percentage
+FROM hmda
+WHERE STATE='37' AND COUNTY='063' AND DENIAL1 = ''
+GROUP BY ACTIONTYPE, RACE1;
+```
+
+#### Step 3
+Now instead of just printing out a table, let's plot the results for an easier interpretation.
+```{r}
+library(ggplot2)
+ggplot(df.q1, aes(x = race1, y = percentage, 
+                  group = interaction(race1, factor(actiontype)), fill = factor(actiontype))) +
+  geom_bar(stat = 'identity')
+```
+
+#### Interpretation
+* Most (I hope) people won't be surprised (and dissapointed) to see that the percent of White applicants with approved loan applications is higher than any other racial demographic, especially so for Black applicants and American Indian/Alaska Native applicants. 
+* Here is where interpretting data is especially important. You should also notice that in green we see that the percent of applicants who are denied, __for no given reason__, is much larger for Black and American Indian/Alaska Native appicants. This leads us to further questions we might want to start asking (and that some academics/researchers can answer[see](#reading-list)); why are Black and American Indian/Alaska Native applicants being denied at higher rates than White applicants for no stated reasons?
+
+### Question 2
+
+#### Step 1
+We are still connected to the database, so now we can just send another SQL query.
+
+Here, I will change my output variable to reflect I am asking a new question: `{sql, connection=con, output.var="df.q2"}`. 
+```{sql, connection=con, output.var="df.q2"}
+SELECT RACE1, AVG(CAST(INCOME AS NUMERIC))
+FROM hmda
+WHERE STATE='37' AND COUNTY='063' AND ACTIONTYPE = '1' AND INCOME <> 'NA'
+GROUP BY RACE1;
+```
+
+```{sql, connection=con, output.var="df.q3"}
+SELECT RACE1, AVG(CAST(INCOME AS NUMERIC))
+FROM hmda
+WHERE STATE='37' AND COUNTY='063' AND ACTIONTYPE = '3' AND INCOME <> 'NA' AND DENIAL1 = ''
+GROUP BY RACE1;
+```
+
+### Why I am doing this
+I've been properly learning SQL through Coursera course (here [link]) this summer. A few years ago, I quickly loaded up some databases for a perception and decision making project I was doing simulations for, but in the hurry of trying to get out a finished product I didn't have the time to properly learn the fundementals of the language. It turns out, it is quite useful (surprising no data scientist ever), especially when you start working with very large amounts of data. Obviously SQL databases are indispensible for many businesses in record keeping and other functions, but here I'm going to use them in a more exploratory research example when downloading data from Data.gov. There are a lot of rich, interesting datasets there, however, loading up a ~2.5Gb file in to R (or Python) seems excessive when I only need part of that dataset to answer the questions I'm interested in today. 
+
+As a first pass -- a little exercise outside of class -- I logged on to Data.gov and just downloaded the first dataset I saw that seemed interesting; the 2008 Home Mortgage Disclosure Act (HMDA) Loan Application Register (LAR) Data. For this example, I'm going to quickly convert this massive csv into a database using PostgreSQL (see [link]). Though today I'll only be asking some pretty simple questions using this data, if I want, I can keep building this database as I find and get more data from different sources. This allows me to store my gathered data in a much more dynamic framework, allowing for the addition of more datasets, without having a bunch of messy and weirdly named .csv files sitting in a folder. Open and well-kept data is good data.
+
+### Reading List
+* [A Loan at Last? Race and Racism in Mortgage Lending](https://link.springer.com/chapter/10.1007/978-3-030-11711-5_11)
+* [Segregation and the Geography of Creditworthiness: Racial Inequality in a Recovered Mortgage Market](https://www.tandfonline.com/doi/full/10.1080/10511482.2017.1341944?casa_token=b3GMq9t6wLsAAAAA%3AaLUQuyPbjXkI9KXZib0FAg91qA74Hw2YDADejjIrmm90o_XqGeYkAJG6wKM-L1F6g0SiD16me7MX)
+* [Residential Mortgage Lending from 2004 to 2015: Evidence from the Home Mortgage Disclosure Act Data](https://www.questia.com/library/journal/1G1-484628739/residential-mortgage-lending-from-2004-to-2015-evidence)
+* [Big Data and Discrimination](https://www.jstor.org/stable/26590562?seq=1#metadata_info_tab_contents)

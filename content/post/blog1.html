@@ -1,0 +1,90 @@
+---
+title: "HMDA Loan Application -- A SQL demo"
+tags: ['SQL', 'R', 'Postgres', 'HMDA', 'linear model']
+draft: true
+---
+
+
+
+<div id="todays-topic" class="section level1">
+<h1>Today’s topic</h1>
+<p>Today we are going to use this HMDA loan application data to look at the relationship between different demographic features of borrowers when applying for a loan, and how that impacts eventual loan acceptance or denial in 2008. We are also going to look at how these demographic factors interact with different reasons given for loan denial. Before we begin, this is just a quick example of using SQL databases in your analysis pipelines, so while we are looking at real data about real people, other researchers and scholars have done a lot more complex and interesting work on this topic and I encourage you to check them out (<a href="#reading-list">click here for reading list</a>).</p>
+<p>The three questions we are going to look at with this dataset are:
+1. In Durham County, NC, does an applicant’s race affect loan denial rates, when no reason for denial is given?
+2. In Durham County, NC, is the income of accepted loan applications different based on race?</p>
+<div id="question-1" class="section level2">
+<h2>Question 1</h2>
+<div id="step-1" class="section level3">
+<h3>Step 1</h3>
+<p>First we need to connect our R notebook to the local SQL database. Thankfully, with the <code>RPostgres</code> and <code>DBI</code> packages, it is exceedingly simple to connect to it in R.</p>
+<pre class="r"><code>#I always try to load all the packages I expect to use first and try to properly set up my R environment
+library(DBI) #load the database interface package
+library(dplyr) #load dplyr for later
+
+#all the below settings can be changed to work with cloud databases as well
+con &lt;- dbConnect(RPostgres::Postgres(), #you&#39;ll need RPostgres package to get R to talk with PostgreSQL
+                 dbname = &#39;mortgages&#39;, #this is database I created
+                 host = &#39;localhost&#39;, #currently I have this saved on my local machine
+                 port = 5432, #localport
+                 user = &#39;postgres&#39;)</code></pre>
+<div id="step-2" class="section level4">
+<h4>Step 2</h4>
+<p>Now that we are connected to the database, we can send SQL queries in R either through code chunks or sending commands in R code chunks using <code>tbl()</code>. I’m going to opt for the former, because I like to keep my languages seperate in my notebooks, as much as possible.</p>
+<p>In this first query, we are going pull data for the primary applicant’s race, what action was taken on the loan application, and then see the percent of applicantions that ended in each action by race, and only when there was no reason given for denial, if an application was eventually denied.</p>
+<p>As a quick technical note for the code, make sure the code chunk header looks like this: <code>{sql, connection=con, output.var=&quot;df.q1&quot;}</code>. Here I have connected the code chunk to the database variable, and then I save the output of the SQL query to a variable I can plot later in <code>ggplot2</code>.</p>
+<pre class="sql"><code>SELECT RACE1, ACTIONTYPE, 
+      COUNT(*) * 100.0 / SUM(COUNT(*)) OVER(PARTITION BY RACE1) AS Percentage
+FROM hmda
+WHERE STATE=&#39;37&#39; AND COUNTY=&#39;063&#39; AND DENIAL1 = &#39;&#39;
+GROUP BY ACTIONTYPE, RACE1;</code></pre>
+</div>
+<div id="step-3" class="section level4">
+<h4>Step 3</h4>
+<p>Now instead of just printing out a table, let’s plot the results for an easier interpretation.</p>
+<pre class="r"><code>library(ggplot2)</code></pre>
+<pre><code>## Warning: package &#39;ggplot2&#39; was built under R version 3.5.2</code></pre>
+<pre class="r"><code>ggplot(df.q1, aes(x = race1, y = percentage, 
+                  group = interaction(race1, factor(actiontype)), fill = factor(actiontype))) +
+  geom_bar(stat = &#39;identity&#39;)</code></pre>
+<p><img src="/post/blog1_files/figure-html/unnamed-chunk-3-1.png" width="672" /></p>
+</div>
+<div id="interpretation" class="section level4">
+<h4>Interpretation</h4>
+<ul>
+<li>Most (I hope) people won’t be surprised (and dissapointed) to see that the percent of White applicants with approved loan applications is higher than any other racial demographic, especially so for Black applicants and American Indian/Alaska Native applicants.</li>
+<li>Here is where interpretting data is especially important. You should also notice that in green we see that the percent of applicants who are denied, <strong>for no given reason</strong>, is much larger for Black and American Indian/Alaska Native appicants. This leads us to further questions we might want to start asking (and that some academics/researchers can answer<a href="#reading-list">see</a>); why are Black and American Indian/Alaska Native applicants being denied at higher rates than White applicants for no stated reasons?</li>
+</ul>
+</div>
+</div>
+<div id="question-2" class="section level3">
+<h3>Question 2</h3>
+<div id="step-1-1" class="section level4">
+<h4>Step 1</h4>
+<p>We are still connected to the database, so now we can just send another SQL query.</p>
+<p>Here, I will change my output variable to reflect I am asking a new question: <code>{sql, connection=con, output.var=&quot;df.q2&quot;}</code>.</p>
+<pre class="sql"><code>SELECT RACE1, AVG(CAST(INCOME AS NUMERIC))
+FROM hmda
+WHERE STATE=&#39;37&#39; AND COUNTY=&#39;063&#39; AND ACTIONTYPE = &#39;1&#39; AND INCOME &lt;&gt; &#39;NA&#39;
+GROUP BY RACE1;</code></pre>
+<pre class="sql"><code>SELECT RACE1, AVG(CAST(INCOME AS NUMERIC))
+FROM hmda
+WHERE STATE=&#39;37&#39; AND COUNTY=&#39;063&#39; AND ACTIONTYPE = &#39;3&#39; AND INCOME &lt;&gt; &#39;NA&#39; AND DENIAL1 = &#39;&#39;
+GROUP BY RACE1;</code></pre>
+</div>
+</div>
+<div id="why-i-am-doing-this" class="section level3">
+<h3>Why I am doing this</h3>
+<p>I’ve been properly learning SQL through Coursera course (here [link]) this summer. A few years ago, I quickly loaded up some databases for a perception and decision making project I was doing simulations for, but in the hurry of trying to get out a finished product I didn’t have the time to properly learn the fundementals of the language. It turns out, it is quite useful (surprising no data scientist ever), especially when you start working with very large amounts of data. Obviously SQL databases are indispensible for many businesses in record keeping and other functions, but here I’m going to use them in a more exploratory research example when downloading data from Data.gov. There are a lot of rich, interesting datasets there, however, loading up a ~2.5Gb file in to R (or Python) seems excessive when I only need part of that dataset to answer the questions I’m interested in today.</p>
+<p>As a first pass – a little exercise outside of class – I logged on to Data.gov and just downloaded the first dataset I saw that seemed interesting; the 2008 Home Mortgage Disclosure Act (HMDA) Loan Application Register (LAR) Data. For this example, I’m going to quickly convert this massive csv into a database using PostgreSQL (see [link]). Though today I’ll only be asking some pretty simple questions using this data, if I want, I can keep building this database as I find and get more data from different sources. This allows me to store my gathered data in a much more dynamic framework, allowing for the addition of more datasets, without having a bunch of messy and weirdly named .csv files sitting in a folder. Open and well-kept data is good data.</p>
+</div>
+<div id="reading-list" class="section level3">
+<h3>Reading List</h3>
+<ul>
+<li><a href="https://link.springer.com/chapter/10.1007/978-3-030-11711-5_11">A Loan at Last? Race and Racism in Mortgage Lending</a></li>
+<li><a href="https://www.tandfonline.com/doi/full/10.1080/10511482.2017.1341944?casa_token=b3GMq9t6wLsAAAAA%3AaLUQuyPbjXkI9KXZib0FAg91qA74Hw2YDADejjIrmm90o_XqGeYkAJG6wKM-L1F6g0SiD16me7MX">Segregation and the Geography of Creditworthiness: Racial Inequality in a Recovered Mortgage Market</a></li>
+<li><a href="https://www.questia.com/library/journal/1G1-484628739/residential-mortgage-lending-from-2004-to-2015-evidence">Residential Mortgage Lending from 2004 to 2015: Evidence from the Home Mortgage Disclosure Act Data</a></li>
+<li><a href="https://www.jstor.org/stable/26590562?seq=1#metadata_info_tab_contents">Big Data and Discrimination</a></li>
+</ul>
+</div>
+</div>
+</div>
