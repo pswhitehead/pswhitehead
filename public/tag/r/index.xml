@@ -13,34 +13,34 @@
     </image>
     
     <item>
-      <title>HMDA Loan Application -- A SQL demo</title>
+      <title>HMDA Loan Application - An SQL exercise</title>
       <link>/post/blog1/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       <guid>/post/blog1/</guid>
       <description>
 
 
-&lt;div id=&#34;todays-topic&#34; class=&#34;section level1&#34;&gt;
-&lt;h1&gt;Today’s topic&lt;/h1&gt;
 &lt;p&gt;Today we are going to use this HMDA loan application data to look at the relationship between different demographic features of borrowers when applying for a loan, and how that impacts eventual loan acceptance or denial in 2008. We are also going to look at how these demographic factors interact with different reasons given for loan denial. Before we begin, this is just a quick example of using SQL databases in your analysis pipelines, so while we are looking at real data about real people, other researchers and scholars have done a lot more complex and interesting work on this topic and I encourage you to check them out (&lt;a href=&#34;#reading-list&#34;&gt;click here for reading list&lt;/a&gt;).&lt;/p&gt;
-&lt;p&gt;The three questions we are going to look at with this dataset are:
-1. In Durham County, NC, does an applicant’s race affect loan denial rates, when no reason for denial is given?
-2. In Durham County, NC, is the income of accepted loan applications different based on race?&lt;/p&gt;
-&lt;div id=&#34;question-1&#34; class=&#34;section level2&#34;&gt;
-&lt;h2&gt;Question 1&lt;/h2&gt;
-&lt;div id=&#34;step-1&#34; class=&#34;section level3&#34;&gt;
-&lt;h3&gt;Step 1&lt;/h3&gt;
+&lt;p&gt;We are going ask two questions of this dataset today, and use SQL to query the dataset.
+&lt;/br&gt;&lt;/br&gt;&lt;/p&gt;
+&lt;div id=&#34;question-1&#34; class=&#34;section level3&#34;&gt;
+&lt;h3&gt;Question 1&lt;/h3&gt;
+&lt;p&gt;In Durham County, NC, does an applicant’s race affect loan denial rates, when no reason for denial is given?&lt;/p&gt;
+&lt;div id=&#34;step-1&#34; class=&#34;section level4&#34;&gt;
+&lt;h4&gt;Step 1&lt;/h4&gt;
 &lt;p&gt;First we need to connect our R notebook to the local SQL database. Thankfully, with the &lt;code&gt;RPostgres&lt;/code&gt; and &lt;code&gt;DBI&lt;/code&gt; packages, it is exceedingly simple to connect to it in R.&lt;/p&gt;
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;#I always try to load all the packages I expect to use first and try to properly set up my R environment
 library(DBI) #load the database interface package
 library(dplyr) #load dplyr for later
+library(ggplot2) # we will plot later
 
 #all the below settings can be changed to work with cloud databases as well
-con &amp;lt;- dbConnect(RPostgres::Postgres(), #you&amp;#39;ll need RPostgres package to get R to talk with PostgreSQL
+con &amp;lt;- dbConnect(RPostgres::Postgres(), #you&amp;#39;ll need RPostgres for R to talk to PostgreSQL
                  dbname = &amp;#39;mortgages&amp;#39;, #this is database I created
-                 host = &amp;#39;localhost&amp;#39;, #currently I have this saved on my local machine
+                 host = &amp;#39;localhost&amp;#39;, #currently I have this saved locally
                  port = 5432, #localport
                  user = &amp;#39;postgres&amp;#39;)&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
 &lt;div id=&#34;step-2&#34; class=&#34;section level4&#34;&gt;
 &lt;h4&gt;Step 2&lt;/h4&gt;
 &lt;p&gt;Now that we are connected to the database, we can send SQL queries in R either through code chunks or sending commands in R code chunks using &lt;code&gt;tbl()&lt;/code&gt;. I’m going to opt for the former, because I like to keep my languages seperate in my notebooks, as much as possible.&lt;/p&gt;
@@ -55,41 +55,84 @@ GROUP BY ACTIONTYPE, RACE1;&lt;/code&gt;&lt;/pre&gt;
 &lt;div id=&#34;step-3&#34; class=&#34;section level4&#34;&gt;
 &lt;h4&gt;Step 3&lt;/h4&gt;
 &lt;p&gt;Now instead of just printing out a table, let’s plot the results for an easier interpretation.&lt;/p&gt;
-&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;library(ggplot2)&lt;/code&gt;&lt;/pre&gt;
-&lt;pre&gt;&lt;code&gt;## Warning: package &amp;#39;ggplot2&amp;#39; was built under R version 3.5.2&lt;/code&gt;&lt;/pre&gt;
-&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;ggplot(df.q1, aes(x = race1, y = percentage, 
-                  group = interaction(race1, factor(actiontype)), fill = factor(actiontype))) +
-  geom_bar(stat = &amp;#39;identity&amp;#39;)&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;ggplot(df.q1 %&amp;gt;% filter(race1 != 6, race1 != 7), #get rid of race when (1) not applicable and (2) when not provided by applicant
+       aes(x = race1, y = percentage, 
+           group = interaction(race1, factor(actiontype)), 
+           fill = factor(actiontype))) +
+  geom_bar(stat = &amp;#39;identity&amp;#39;, color = &amp;quot;black&amp;quot;) + 
+  ylab(&amp;quot;Percent of applications (%)&amp;quot;) + xlab(&amp;quot;Race&amp;quot;) + #set axis labels
+  scale_fill_brewer(palette=&amp;quot;Dark2&amp;quot;, #use a default color scheme and set labels
+                    name=&amp;quot;Action to Loan Application&amp;quot;, 
+                    label = c(&amp;quot;Loan Originated&amp;quot;,
+                              &amp;quot;Application approaced but not accepted&amp;quot;,
+                              &amp;quot;Application denied by financial institution&amp;quot;,
+                              &amp;quot;Application withdrawn by applicant&amp;quot;,
+                              &amp;quot;File closed for incompleteness&amp;quot;,
+                              &amp;quot;Loan purchased by institution&amp;quot;)) +
+  scale_x_discrete(labels = c(&amp;quot;American Indian \nAlaska Native&amp;quot;,
+                              &amp;quot;Asian&amp;quot;,
+                              &amp;quot;Black \nAfrican American&amp;quot;,
+                              &amp;quot;Native Hawaiian \n Pacific Islander&amp;quot;,
+                              &amp;quot;White&amp;quot;)) +
+  theme_bw() + #set of design elements that look nice
+  theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1)) #angle the x-axis labels to fit&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;&lt;img src=&#34;/post/blog1_files/figure-html/unnamed-chunk-3-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;Each bar for race adds up to 100% because we want to know what happens to applications as a funciton of race, but we need to account for different base rates of applications. Therefore, looking at the outcome for applications as a percent value for each race lets us do between-race comparisons.&lt;/p&gt;
 &lt;/div&gt;
-&lt;div id=&#34;interpretation&#34; class=&#34;section level4&#34;&gt;
-&lt;h4&gt;Interpretation&lt;/h4&gt;
+&lt;div id=&#34;what-does-this-mean&#34; class=&#34;section level4&#34;&gt;
+&lt;h4&gt;What does this mean?&lt;/h4&gt;
 &lt;ul&gt;
-&lt;li&gt;Most (I hope) people won’t be surprised (and dissapointed) to see that the percent of White applicants with approved loan applications is higher than any other racial demographic, especially so for Black applicants and American Indian/Alaska Native applicants.&lt;/li&gt;
-&lt;li&gt;Here is where interpretting data is especially important. You should also notice that in green we see that the percent of applicants who are denied, &lt;strong&gt;for no given reason&lt;/strong&gt;, is much larger for Black and American Indian/Alaska Native appicants. This leads us to further questions we might want to start asking (and that some academics/researchers can answer&lt;a href=&#34;#reading-list&#34;&gt;see&lt;/a&gt;); why are Black and American Indian/Alaska Native applicants being denied at higher rates than White applicants for no stated reasons?&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;Most people (I hope) won’t be surprised (but dissapointed) to see that the percent of White applicants with approved loan applications is higher than any other racial demographic. This is especially true for Black applicants and American Indian/Alaska Native applicants.&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;Here is where interpretting data is especially important. You should also notice that in purple we see that the percent of applicants who are denied, &lt;strong&gt;for no given reason&lt;/strong&gt;, is much larger for Black and American Indian/Alaska Native appicants.&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;This leads us to further questions we might want to start asking (and that some academics/researchers can answer&lt;a href=&#34;#reading-list&#34;&gt;see&lt;/a&gt;); why are Black and American Indian/Alaska Native applicants being denied at higher rates than White applicants for no stated reasons?
+&lt;/br&gt;&lt;/br&gt;&lt;/p&gt;&lt;/li&gt;
 &lt;/ul&gt;
 &lt;/div&gt;
 &lt;/div&gt;
 &lt;div id=&#34;question-2&#34; class=&#34;section level3&#34;&gt;
 &lt;h3&gt;Question 2&lt;/h3&gt;
+&lt;p&gt;In Durham County, NC, is the income of accepted loan applications different based on race?&lt;/p&gt;
 &lt;div id=&#34;step-1-1&#34; class=&#34;section level4&#34;&gt;
 &lt;h4&gt;Step 1&lt;/h4&gt;
-&lt;p&gt;We are still connected to the database, so now we can just send another SQL query.&lt;/p&gt;
-&lt;p&gt;Here, I will change my output variable to reflect I am asking a new question: &lt;code&gt;{sql, connection=con, output.var=&amp;quot;df.q2&amp;quot;}&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;We are still connected to the database, so now we can just send another SQL query. Remember our question is if income of accepted loan applications differs based on race.
+&lt;/br&gt;&lt;/br&gt;
+Here, I will change my output variable to reflect I am asking a new question: &lt;code&gt;{sql, connection=con, output.var=&amp;quot;df.q2&amp;quot;}&lt;/code&gt;.&lt;/p&gt;
 &lt;pre class=&#34;sql&#34;&gt;&lt;code&gt;SELECT RACE1, AVG(CAST(INCOME AS NUMERIC))
 FROM hmda
 WHERE STATE=&amp;#39;37&amp;#39; AND COUNTY=&amp;#39;063&amp;#39; AND ACTIONTYPE = &amp;#39;1&amp;#39; AND INCOME &amp;lt;&amp;gt; &amp;#39;NA&amp;#39;
 GROUP BY RACE1;&lt;/code&gt;&lt;/pre&gt;
-&lt;pre class=&#34;sql&#34;&gt;&lt;code&gt;SELECT RACE1, AVG(CAST(INCOME AS NUMERIC))
-FROM hmda
-WHERE STATE=&amp;#39;37&amp;#39; AND COUNTY=&amp;#39;063&amp;#39; AND ACTIONTYPE = &amp;#39;3&amp;#39; AND INCOME &amp;lt;&amp;gt; &amp;#39;NA&amp;#39; AND DENIAL1 = &amp;#39;&amp;#39;
-GROUP BY RACE1;&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;div id=&#34;step-2-1&#34; class=&#34;section level4&#34;&gt;
+&lt;h4&gt;Step 2&lt;/h4&gt;
+&lt;p&gt;Now let’s plot the results of the SQL query.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;ggplot(df.q2 %&amp;gt;% filter(race1 != 6, race1 != 7), #get rid of race when (1) not applicable and (2) when not provided by applicant
+       aes(x = race1, y = avg*1000, 
+           group = race1)) +
+  geom_bar(stat = &amp;#39;identity&amp;#39;, color = &amp;quot;black&amp;quot;) +
+  ylab(&amp;quot;Average income&amp;quot;) + xlab(&amp;quot;Race&amp;quot;) + #set axis labels
+  scale_x_discrete(labels = c(&amp;quot;American Indian \nAlaska Native&amp;quot;,
+                              &amp;quot;Asian&amp;quot;,
+                              &amp;quot;Black \nAfrican American&amp;quot;,
+                              &amp;quot;Native Hawaiian \n Pacific Islander&amp;quot;,
+                              &amp;quot;White&amp;quot;)) +
+  theme_bw() + #set of design elements that look nice
+  theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1)) #angle the x-axis labels to fit&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;/post/blog1_files/figure-html/unnamed-chunk-5-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;what-does-this-mean-1&#34; class=&#34;section level4&#34;&gt;
+&lt;h4&gt;What does this mean?&lt;/h4&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;p&gt;You’ll notice that Black applicants had the lowest average income in Durham County, NC, among accepted loan applications. This is a stark difference in the graph, and there is a lot more at play here that contributes to this disparity.&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;However, though White applicants had the highest acceptance rate for loan applications, you’ll notice that they do not have the highest average income. In fact, the average income for the remaining racial groups is within 10k of each other.
+&lt;/br&gt;&lt;/br&gt;&lt;/p&gt;&lt;/li&gt;
+&lt;/ul&gt;
 &lt;/div&gt;
 &lt;/div&gt;
-&lt;div id=&#34;why-i-am-doing-this&#34; class=&#34;section level3&#34;&gt;
-&lt;h3&gt;Why I am doing this&lt;/h3&gt;
-&lt;p&gt;I’ve been properly learning SQL through Coursera course (here [link]) this summer. A few years ago, I quickly loaded up some databases for a perception and decision making project I was doing simulations for, but in the hurry of trying to get out a finished product I didn’t have the time to properly learn the fundementals of the language. It turns out, it is quite useful (surprising no data scientist ever), especially when you start working with very large amounts of data. Obviously SQL databases are indispensible for many businesses in record keeping and other functions, but here I’m going to use them in a more exploratory research example when downloading data from Data.gov. There are a lot of rich, interesting datasets there, however, loading up a ~2.5Gb file in to R (or Python) seems excessive when I only need part of that dataset to answer the questions I’m interested in today.&lt;/p&gt;
-&lt;p&gt;As a first pass – a little exercise outside of class – I logged on to Data.gov and just downloaded the first dataset I saw that seemed interesting; the 2008 Home Mortgage Disclosure Act (HMDA) Loan Application Register (LAR) Data. For this example, I’m going to quickly convert this massive csv into a database using PostgreSQL (see [link]). Though today I’ll only be asking some pretty simple questions using this data, if I want, I can keep building this database as I find and get more data from different sources. This allows me to store my gathered data in a much more dynamic framework, allowing for the addition of more datasets, without having a bunch of messy and weirdly named .csv files sitting in a folder. Open and well-kept data is good data.&lt;/p&gt;
+&lt;div id=&#34;why-am-i-doing-this&#34; class=&#34;section level3&#34;&gt;
+&lt;h3&gt;Why am I doing this&lt;/h3&gt;
+&lt;p&gt;I’ve been properly learning SQL through Coursera course (&lt;a href=&#34;https://www.coursera.org/learn/analytics-mysql/&#34;&gt;here&lt;/a&gt;) this summer. A few years ago, I quickly loaded up some databases for a perception and decision making project I was doing simulations for, but in the hurry of trying to get out a finished product I didn’t have the time to properly learn the fundementals of the language. It turns out, it is quite useful (surprising no data scientist ever), especially when you start working with very large amounts of data. Obviously SQL databases are indispensible for many businesses in record keeping and other functions, but here I’m going to use them in a more exploratory research example when downloading data from Data.gov. There are a lot of rich, interesting datasets there, however, loading up a ~2.5Gb file in to R (or Python) seems excessive when I only need part of that dataset to answer the questions I’m interested in today.&lt;/p&gt;
+&lt;p&gt;As a first pass – a little exercise outside of class – I logged on to Data.gov and just downloaded the first dataset I saw that seemed interesting; the 2008 Home Mortgage Disclosure Act (HMDA) Loan Application Register (LAR) Data (&lt;a href=&#34;https://catalog.data.gov/dataset/2008-home-mortgage-disclosure-act-hmda-loan-application-register-lar-data&#34;&gt;see&lt;/a&gt;). For this example, I just quickly converted this massive csv into a database using PostgreSQL (&lt;a href=&#34;https://www.postgresqltutorial.com/import-csv-file-into-posgresql-table/&#34;&gt;see&lt;/a&gt;). Though today I only asked simple questions using this data, if I want, I can keep building this database as I find and get more data from different sources. This allows me to store my gathered data in a much more dynamic framework, allowing for the addition of more datasets, without having a bunch of messy and weirdly named .csv files sitting in a folder. Open and well-kept data is good data.
+&lt;/br&gt;&lt;/br&gt;&lt;/p&gt;
 &lt;/div&gt;
 &lt;div id=&#34;reading-list&#34; class=&#34;section level3&#34;&gt;
 &lt;h3&gt;Reading List&lt;/h3&gt;
@@ -99,8 +142,6 @@ GROUP BY RACE1;&lt;/code&gt;&lt;/pre&gt;
 &lt;li&gt;&lt;a href=&#34;https://www.questia.com/library/journal/1G1-484628739/residential-mortgage-lending-from-2004-to-2015-evidence&#34;&gt;Residential Mortgage Lending from 2004 to 2015: Evidence from the Home Mortgage Disclosure Act Data&lt;/a&gt;&lt;/li&gt;
 &lt;li&gt;&lt;a href=&#34;https://www.jstor.org/stable/26590562?seq=1#metadata_info_tab_contents&#34;&gt;Big Data and Discrimination&lt;/a&gt;&lt;/li&gt;
 &lt;/ul&gt;
-&lt;/div&gt;
-&lt;/div&gt;
 &lt;/div&gt;
 </description>
     </item>

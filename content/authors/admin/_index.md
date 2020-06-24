@@ -65,7 +65,7 @@ user_groups:
 - Visitors
 ---
 
-I specialize in using an interdisciplinary approach to deliver actionable insights into human behavior and decision making. As a PhD researcher, I primarily focused on the basic processes of memory, attention, and performance. 
+I specialize in using an interdisciplinary approach to deliver actionable insights into human behavior and decision making. As a PhD researcher, I primarily focused on the basic processes of human performance, attention, and memory. 
 
 I am highly proficient in different methodologies for experimental design and collection (EEG, eye tracking, individual differences, fMRI, online behavioral assessment) and the creation of custom pipelines for the analysis and interpretation of data using various techniques (hierarchical modeling, multivariate decoding, signal processing, Bayesian analysis). 
 
