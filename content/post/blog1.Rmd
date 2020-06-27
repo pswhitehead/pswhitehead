@@ -2,7 +2,7 @@
 title: "HMDA Loan Application - An SQL exercise"
 tags: ['SQL', 'R', 'Postgres', 'HMDA', 'linear model']
 date: "2020-06-27"
-draft: true
+draft: false
 ---
 
 Today we are going to use HMDA loan application data to look at the relationship between different demographic features of borrowers when applying for a loan, and how that impacts eventual loan acceptance or denial in 2008. We are also going to look at how these demographic factors interact with different reasons given for loan denial. Before we begin, this is just a quick example of using SQL databases in your analysis pipelines, so while we are looking at real data about real people, other researchers and scholars have done a lot more complex and interesting work on this topic and I encourage you to check them out ([click here for reading list](#reading-list)).
