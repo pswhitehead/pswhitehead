@@ -17,23 +17,20 @@
       <link>/post/blog2/</link>
       <pubDate>Mon, 20 Jul 2020 00:00:00 +0000</pubDate>
       <guid>/post/blog2/</guid>
-      <description>&lt;p&gt;This week I decided to write a pretty simple webscraper to collect some property records from the 
-&lt;a href=&#34;https://www.dconc.gov/government/departments-f-z/tax-administration/real-estate-appraisal/real-property-record-search&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;Durham County website&lt;/a&gt;. I looked to see if they had an API, but I couldn&amp;rsquo;t find one, so this seemed like an opportunity to write a short blog about building a quick webscraper (reading for 
-&lt;a href=&#34;#reading-list&#34;&gt;technical resources&lt;/a&gt;).&lt;/p&gt;
-&lt;p&gt;This script will build a database of property values and information that I can use for future analysis and projects (thoughts on 
-&lt;a href=&#34;#future-uses&#34;&gt;future uses&lt;/a&gt;). Since I view this as &amp;lsquo;human data&amp;rsquo;, at least in some part, I&amp;rsquo;m only going to scrape non-identifiable data (articles on 
-&lt;a href=&#34;#reading-list&#34;&gt;ethics in data mining&lt;/a&gt;); I won&amp;rsquo;t be collecting the physical address or owner&amp;rsquo;s name for each property. While I will go over the code here, you can download the python code from 
-&lt;a href=&#34;https://github.com/pswhitehead/Durham-Property-Webscraper&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;my repository here&lt;/a&gt;.
+      <description>
+
+
+&lt;p&gt;This week I decided to write a pretty simple webscraper to collect some property records from the &lt;a href=&#34;https://www.dconc.gov/government/departments-f-z/tax-administration/real-estate-appraisal/real-property-record-search&#34;&gt;Durham County website&lt;/a&gt;. I looked to see if they had an API, but I couldn’t find one, so this seemed like an opportunity to write a short blog about building a quick webscraper (reading for &lt;a href=&#34;#reading-list&#34;&gt;technical resources&lt;/a&gt;).&lt;/p&gt;
+&lt;p&gt;This script will build a database of property values and information that I can use for future analysis and projects (thoughts on &lt;a href=&#34;#future-uses&#34;&gt;future uses&lt;/a&gt;). Since I view this as ‘human data’, at least in some part, I’m only going to scrape non-identifiable data (articles on &lt;a href=&#34;#reading-list&#34;&gt;ethics in data mining&lt;/a&gt;); I won’t be collecting the physical address or owner’s name for each property. While I will go over the code here, you can download the python code from &lt;a href=&#34;https://github.com/pswhitehead/Durham-Property-Webscraper&#34;&gt;my repository here&lt;/a&gt;.
 &lt;/br&gt;&lt;/br&gt;&lt;/p&gt;
-&lt;h3 id=&#34;main-goal&#34;&gt;Main Goal&lt;/h3&gt;
+&lt;div id=&#34;main-goal&#34; class=&#34;section level3&#34;&gt;
+&lt;h3&gt;Main Goal&lt;/h3&gt;
 &lt;p&gt;The main goal today when building this webscraper is to load and collect relevant property record data from each parcel in Durham county, from the county website, and then input that data in to a &lt;code&gt;PostgreSQL&lt;/code&gt; database. Below I will walk through each section of the code to do this.
 &lt;/br&gt;&lt;/br&gt;&lt;/p&gt;
-&lt;h4 id=&#34;step-1&#34;&gt;Step 1&lt;/h4&gt;
-&lt;p&gt;We need to import all the libraries we need for this project. I am using &lt;code&gt;Selenium&lt;/code&gt; (
-&lt;a href=&#34;https://selenium-python.readthedocs.io/&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;link&lt;/a&gt;), as the website I&amp;rsquo;m scraping from needs to load up the webpage for us to eb able to scrape the information (link about that here). I also chose to use &lt;code&gt;psycopg2&lt;/code&gt; (
-&lt;a href=&#34;https://www.psycopg.org/docs/&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;link&lt;/a&gt;) to interact with the &lt;code&gt;PostgreSQL&lt;/code&gt; database I created for this project. If you need to install &lt;code&gt;Selenium&lt;/code&gt; ir &lt;code&gt;psycopg2&lt;/code&gt;, it&amp;rsquo;s pretty easy to do via &lt;code&gt;Anaconda&lt;/code&gt; (
-&lt;a href=&#34;https://www.anaconda.com/&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;link&lt;/a&gt;).&lt;/p&gt;
-&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;####Import the libraries we need####
+&lt;div id=&#34;step-1&#34; class=&#34;section level4&#34;&gt;
+&lt;h4&gt;Step 1&lt;/h4&gt;
+&lt;p&gt;We need to import all the libraries we need for this project. I am using &lt;code&gt;Selenium&lt;/code&gt; (&lt;a href=&#34;https://selenium-python.readthedocs.io/&#34;&gt;link&lt;/a&gt;), as the website I’m scraping from needs to load up the webpage for us to eb able to scrape the information (link about that here). I also chose to use &lt;code&gt;psycopg2&lt;/code&gt; (&lt;a href=&#34;https://www.psycopg.org/docs/&#34;&gt;link&lt;/a&gt;) to interact with the &lt;code&gt;PostgreSQL&lt;/code&gt; database I created for this project. If you need to install &lt;code&gt;Selenium&lt;/code&gt; ir &lt;code&gt;psycopg2&lt;/code&gt;, it’s pretty easy to do via &lt;code&gt;Anaconda&lt;/code&gt; (&lt;a href=&#34;https://www.anaconda.com/&#34;&gt;link&lt;/a&gt;).&lt;/p&gt;
+&lt;pre class=&#34;python&#34;&gt;&lt;code&gt;####Import the libraries we need####
 import numpy as np
 from selenium import webdriver
 from bs4 import BeautifulSoup
@@ -41,31 +38,31 @@ import time
 import re
 from selenium.webdriver.firefox.options import Options
 import psycopg2
-from psycopg2 import sql
-&lt;/code&gt;&lt;/pre&gt;
+from psycopg2 import sql&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;&lt;/br&gt;&lt;/br&gt;&lt;/p&gt;
-&lt;h4 id=&#34;step-2&#34;&gt;Step 2&lt;/h4&gt;
+&lt;/div&gt;
+&lt;div id=&#34;step-2&#34; class=&#34;section level4&#34;&gt;
+&lt;h4&gt;Step 2&lt;/h4&gt;
 &lt;p&gt;Once we have the libraries loaded up we are going to write the functions we need both to interact with the SQL database as well as scrape the data from the county website.&lt;/p&gt;
-&lt;p&gt;In the SQL database I created, I have a table &amp;ndash; &lt;code&gt;scrapeprog&lt;/code&gt; &amp;ndash; that contains all the url IDs and a status variable for each, currently set to 2 which will represent a &amp;lsquo;pending&amp;rsquo; status here. This first SQL call function is going to allow us to run the .py script without needing to give an input by querying the &lt;code&gt;scrapeprog&lt;/code&gt; table in our SQL database to see which url ID we haven&amp;rsquo;t tried to scrape yet.&lt;/p&gt;
-&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;##To query what we need to scrape yet##
+&lt;p&gt;In the SQL database I created, I have a table – &lt;code&gt;scrapeprog&lt;/code&gt; – that contains all the url IDs and a status variable for each, currently set to 2 which will represent a ‘pending’ status here. This first SQL call function is going to allow us to run the .py script without needing to give an input by querying the &lt;code&gt;scrapeprog&lt;/code&gt; table in our SQL database to see which url ID we haven’t tried to scrape yet.&lt;/p&gt;
+&lt;pre class=&#34;python&#34;&gt;&lt;code&gt;##To query what we need to scrape yet##
 def findsql():    
-    #Set up a connection to the PostgresSQL server we&#39;ll write data to
+    #Set up a connection to the PostgresSQL server we&amp;#39;ll write data to
     conn = psycopg2.connect(host=&amp;quot;localhost&amp;quot;,database=&amp;quot;durhamprop&amp;quot;, user=&amp;quot;postgres&amp;quot;, password=&amp;quot;postgres&amp;quot;)
     cur = conn.cursor()
     
     #Write an sql query
     query = sql.SQL(&amp;quot;SELECT * FROM {table} WHERE {key} = 2 LIMIT 1&amp;quot;).format(
-        table=sql.Identifier(&#39;scrapeprog&#39;),
-        key=sql.Identifier(&#39;status&#39;))
+        table=sql.Identifier(&amp;#39;scrapeprog&amp;#39;),
+        key=sql.Identifier(&amp;#39;status&amp;#39;))
     
     #execute query
     cur.execute(query)
-    return cur.fetchall()
-&lt;/code&gt;&lt;/pre&gt;
+    return cur.fetchall()&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;The second SQL call function will allow us to insert and edit data in the SQL database.&lt;/p&gt;
-&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;##To make sql calls to insert and change data##
+&lt;pre class=&#34;python&#34;&gt;&lt;code&gt;##To make sql calls to insert and change data##
 def callsql(command, data = None):
-    #Set up a connection to the PostgresSQL server we&#39;ll write data to
+    #Set up a connection to the PostgresSQL server we&amp;#39;ll write data to
     conn = psycopg2.connect(host=&amp;quot;localhost&amp;quot;,database=&amp;quot;durhamprop&amp;quot;, user=&amp;quot;postgres&amp;quot;, password=&amp;quot;postgres&amp;quot;)
     cur = conn.cursor()
     
@@ -74,46 +71,45 @@ def callsql(command, data = None):
         cur.execute(command)
     else:
         cur.execute(command, data)
-    conn.commit()  
-&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;The third function I wrote allows us to load a webpage from the county&amp;rsquo;s property records site and scrape the data we want to put in the SQL database&lt;/p&gt;
-&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;##To scrape the data from each property##
+    conn.commit()  &lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;The third function I wrote allows us to load a webpage from the county’s property records site and scrape the data we want to put in the SQL database&lt;/p&gt;
+&lt;pre class=&#34;python&#34;&gt;&lt;code&gt;##To scrape the data from each property##
 def getpropertydata(i):  
-    #Setp up the website we&#39;ll scrape data from
+    #Setp up the website we&amp;#39;ll scrape data from
     url = [&amp;quot;https://property.spatialest.com/nc/durham/#/property/&amp;quot;+str(i)]
     
     #Set up the Selenium web driver and then call the URL
     options = Options()
-    options.headless = True #I don&#39;t want to open a physical window each tme
+    options.headless = True #I don&amp;#39;t want to open a physical window each tme
     driver = webdriver.Firefox(options=options)
     driver.get(url[0])
     time.sleep(2) #Because we are loading the page, I wait a few seconds before the next command
     
-    if driver.current_url == url[0]: #check the status isn&#39;t 404  or redirected before we scrape the info
+    if driver.current_url == url[0]: #check the status isn&amp;#39;t 404  or redirected before we scrape the info
         #Parse the html
-        soup_ID = BeautifulSoup(driver.page_source, &#39;html.parser&#39;)
+        soup_ID = BeautifulSoup(driver.page_source, &amp;#39;html.parser&amp;#39;)
         
         #Find the key info (ki)
-        ki0 = re.findall(r&#39;&amp;gt;(.*?)&amp;lt;&#39;, str(soup_ID.find(id = &#39;default_overview&#39;).findAll(&#39;span&#39;)[9]))[0] #landuse
-        ki1 = re.findall(r&#39;&amp;gt;(.*?)&amp;lt;&#39;, str(soup_ID.find(id = &#39;default_overview&#39;).findAll(&#39;span&#39;)[13]))[0] #subdiv
-        ki2 = re.findall(r&#39;&amp;gt;(.*?)&amp;lt;&#39;, str(soup_ID.find(id = &#39;default_overview&#39;).findAll(&#39;span&#39;)[21]))[0] #saledate
-        ki3 = re.findall(r&#39;&amp;gt;(.*?)&amp;lt;&#39;, str(soup_ID.find(id = &#39;default_overview&#39;).findAll(&#39;span&#39;)[23]))[0] #saleprice
+        ki0 = re.findall(r&amp;#39;&amp;gt;(.*?)&amp;lt;&amp;#39;, str(soup_ID.find(id = &amp;#39;default_overview&amp;#39;).findAll(&amp;#39;span&amp;#39;)[9]))[0] #landuse
+        ki1 = re.findall(r&amp;#39;&amp;gt;(.*?)&amp;lt;&amp;#39;, str(soup_ID.find(id = &amp;#39;default_overview&amp;#39;).findAll(&amp;#39;span&amp;#39;)[13]))[0] #subdiv
+        ki2 = re.findall(r&amp;#39;&amp;gt;(.*?)&amp;lt;&amp;#39;, str(soup_ID.find(id = &amp;#39;default_overview&amp;#39;).findAll(&amp;#39;span&amp;#39;)[21]))[0] #saledate
+        ki3 = re.findall(r&amp;#39;&amp;gt;(.*?)&amp;lt;&amp;#39;, str(soup_ID.find(id = &amp;#39;default_overview&amp;#39;).findAll(&amp;#39;span&amp;#39;)[23]))[0] #saleprice
         
         #Find the buildinfo (bi)
-        bi0 = re.findall(r&#39;&amp;gt;(.*?)&amp;lt;&#39;, str(soup_ID.find(id = &#39;default_buildings&#39;).findAll(&#39;span&#39;)[-1]))[0] #value
-        bi1 = re.findall(r&#39;&amp;gt;(.*?)&amp;lt;&#39;, str(soup_ID.find(id = &#39;default_buildings&#39;).findAll(&#39;span&#39;)[4]))[0] #year built
-        bi2 = re.findall(r&#39;&amp;gt;(.*?)&amp;lt;&#39;, str(soup_ID.find(id = &#39;default_buildings&#39;).findAll(&#39;span&#39;)[13]))[0] #area
-        bi3 = re.findall(r&#39;&amp;gt;(.*?)&amp;lt;&#39;, str(soup_ID.find(id = &#39;default_buildings&#39;).findAll(&#39;span&#39;)[15]))[0] #bathrooms
-        bi4 = re.findall(r&#39;&amp;gt;(.*?)&amp;lt;&#39;, str(soup_ID.find(id = &#39;default_buildings&#39;).findAll(&#39;span&#39;)[19]))[0] #bedrooms
-        bi5 = re.findall(r&#39;&amp;gt;(.*?)&amp;lt;&#39;, str(soup_ID.find(id = &#39;default_buildings&#39;).findAll(&#39;span&#39;)[8]))[0] #use
-        bi6 = re.findall(r&#39;&amp;gt;(.*?)&amp;lt;&#39;, str(soup_ID.find(id = &#39;default_buildings&#39;).findAll(&#39;span&#39;)[6]))[0] #builduse
+        bi0 = re.findall(r&amp;#39;&amp;gt;(.*?)&amp;lt;&amp;#39;, str(soup_ID.find(id = &amp;#39;default_buildings&amp;#39;).findAll(&amp;#39;span&amp;#39;)[-1]))[0] #value
+        bi1 = re.findall(r&amp;#39;&amp;gt;(.*?)&amp;lt;&amp;#39;, str(soup_ID.find(id = &amp;#39;default_buildings&amp;#39;).findAll(&amp;#39;span&amp;#39;)[4]))[0] #year built
+        bi2 = re.findall(r&amp;#39;&amp;gt;(.*?)&amp;lt;&amp;#39;, str(soup_ID.find(id = &amp;#39;default_buildings&amp;#39;).findAll(&amp;#39;span&amp;#39;)[13]))[0] #area
+        bi3 = re.findall(r&amp;#39;&amp;gt;(.*?)&amp;lt;&amp;#39;, str(soup_ID.find(id = &amp;#39;default_buildings&amp;#39;).findAll(&amp;#39;span&amp;#39;)[15]))[0] #bathrooms
+        bi4 = re.findall(r&amp;#39;&amp;gt;(.*?)&amp;lt;&amp;#39;, str(soup_ID.find(id = &amp;#39;default_buildings&amp;#39;).findAll(&amp;#39;span&amp;#39;)[19]))[0] #bedrooms
+        bi5 = re.findall(r&amp;#39;&amp;gt;(.*?)&amp;lt;&amp;#39;, str(soup_ID.find(id = &amp;#39;default_buildings&amp;#39;).findAll(&amp;#39;span&amp;#39;)[8]))[0] #use
+        bi6 = re.findall(r&amp;#39;&amp;gt;(.*?)&amp;lt;&amp;#39;, str(soup_ID.find(id = &amp;#39;default_buildings&amp;#39;).findAll(&amp;#39;span&amp;#39;)[6]))[0] #builduse
 
         #Find the assessment details (ad)
-        ad0 = re.findall(r&#39;&amp;gt;(.*?)&amp;lt;&#39;, str(soup_ID.find(id = &#39;LandDetails&#39;).findAll(&#39;td&#39;)[0]))[0] #fair market value
-        ad1 = re.findall(r&#39;&amp;gt;(.*?)&amp;lt;&#39;, str(soup_ID.find(id = &#39;LandDetails&#39;).findAll(&#39;td&#39;)[1]))[0] #land assessed value
-        ad2 = re.findall(r&#39;&amp;gt;(.*?)&amp;lt;&#39;, str(soup_ID.find(id = &#39;LandDetails&#39;).findAll(&#39;td&#39;)[2]))[0] #acres
-        ad3 = re.findall(r&#39;&amp;gt;(.*?)&amp;lt;&#39;, str(soup_ID.find(id = &#39;default_overview&#39;).findAll(&#39;span&#39;)[-3]))[0] #improvement
-        ad4 = re.findall(r&#39;&amp;gt;(.*?)&amp;lt;&#39;, str(soup_ID.find(id = &#39;default_overview&#39;).findAll(&#39;span&#39;)[-1]))[0] #totalfmv
+        ad0 = re.findall(r&amp;#39;&amp;gt;(.*?)&amp;lt;&amp;#39;, str(soup_ID.find(id = &amp;#39;LandDetails&amp;#39;).findAll(&amp;#39;td&amp;#39;)[0]))[0] #fair market value
+        ad1 = re.findall(r&amp;#39;&amp;gt;(.*?)&amp;lt;&amp;#39;, str(soup_ID.find(id = &amp;#39;LandDetails&amp;#39;).findAll(&amp;#39;td&amp;#39;)[1]))[0] #land assessed value
+        ad2 = re.findall(r&amp;#39;&amp;gt;(.*?)&amp;lt;&amp;#39;, str(soup_ID.find(id = &amp;#39;LandDetails&amp;#39;).findAll(&amp;#39;td&amp;#39;)[2]))[0] #acres
+        ad3 = re.findall(r&amp;#39;&amp;gt;(.*?)&amp;lt;&amp;#39;, str(soup_ID.find(id = &amp;#39;default_overview&amp;#39;).findAll(&amp;#39;span&amp;#39;)[-3]))[0] #improvement
+        ad4 = re.findall(r&amp;#39;&amp;gt;(.*?)&amp;lt;&amp;#39;, str(soup_ID.find(id = &amp;#39;default_overview&amp;#39;).findAll(&amp;#39;span&amp;#39;)[-1]))[0] #totalfmv
         
         #write sql code to insert
         sqltemp_ki = &amp;quot;&amp;quot;&amp;quot;INSERT INTO keyinfo(landuse,subdiv,saledate,saleprice,id)
@@ -130,22 +126,22 @@ def getpropertydata(i):
         callsql(sqltemp_bi, [bi0,bi1,bi2,bi3,bi4,bi5,bi6,i])
         callsql(sqltemp_ad, [ad0,ad1,ad2,ad3,ad4,i])
     
-    driver.quit()  
-&lt;/code&gt;&lt;/pre&gt;
+    driver.quit()  &lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;&lt;/br&gt;&lt;/br&gt;&lt;/p&gt;
-&lt;h4 id=&#34;step-3&#34;&gt;Step 3&lt;/h4&gt;
+&lt;/div&gt;
+&lt;div id=&#34;step-3&#34; class=&#34;section level4&#34;&gt;
+&lt;h4&gt;Step 3&lt;/h4&gt;
 &lt;p&gt;Now we are ready to run these functions and start collecting some data to put in to our database for later.&lt;/p&gt;
 &lt;p&gt;Before we start, we are going to define to sql queries to update the status in out &lt;code&gt;scrapeprog&lt;/code&gt; table, to let us know if we scraped the data successfully or not.&lt;/p&gt;
-&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;##Define the calls for if we sucessfully/un scrape data##
+&lt;pre class=&#34;python&#34;&gt;&lt;code&gt;##Define the calls for if we sucessfully/un scrape data##
 
 #Update the ID status to 1 = success
 sqlsuccess = sql.SQL(&amp;quot;UPDATE scrapeprog SET status = 1 WHERE id = ({})&amp;quot;).format(sql.Literal(str(j[0])))
 
 #Update the ID status to 0 = fail
-sqlfail = sql.SQL(&amp;quot;UPDATE scrapeprog SET status = 0 WHERE id = ({})&amp;quot;).format(sql.Literal(str(j[0])))
-&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;Now we run the &lt;code&gt;getpropertydata()&lt;/code&gt; function in a while loop until there are no &amp;lsquo;pending&amp;rsquo; ID values in the &lt;code&gt;scrapeprog&lt;/code&gt; SQL table.&lt;/p&gt;
-&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;##Run this in a while loop until it cant run no more!##
+sqlfail = sql.SQL(&amp;quot;UPDATE scrapeprog SET status = 0 WHERE id = ({})&amp;quot;).format(sql.Literal(str(j[0])))&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Now we run the &lt;code&gt;getpropertydata()&lt;/code&gt; function in a while loop until there are no ‘pending’ ID values in the &lt;code&gt;scrapeprog&lt;/code&gt; SQL table.&lt;/p&gt;
+&lt;pre class=&#34;python&#34;&gt;&lt;code&gt;##Run this in a while loop until it cant run no more!##
 while findsql()[0][1] == 2: #i.e. while status is pending = 2
     j = findsql()[0] #where the 0th index is the id, and the 1st is the status
     try:
@@ -153,32 +149,35 @@ while findsql()[0][1] == 2: #i.e. while status is pending = 2
         callsql(sqlsuccess)
     except:
         print(j[0]) #just a nice visual as we go
-        callsql(sqlfail)  
-&lt;/code&gt;&lt;/pre&gt;
+        callsql(sqlfail)  &lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;&lt;/br&gt;&lt;/br&gt;&lt;/p&gt;
-&lt;h3 id=&#34;future-uses&#34;&gt;Future Uses&lt;/h3&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div id=&#34;future-uses&#34; class=&#34;section level3&#34;&gt;
+&lt;h3&gt;Future Uses&lt;/h3&gt;
 &lt;p&gt;In another blog post sometime, I am going to use the data I collected to run an isolation forest algorithm to detect outliers in the assessment value of each property, based on the features of each property. These outliers could be due to errors in data input (the county website has a disclaimer regarding this), human error in the assessment of a property, or particularly odd properties that have unknown features not captured in the property tax records.&lt;/p&gt;
-&lt;p&gt;I also hope to find a few more uses for this information, likely involving predicting sales data for properties or determining what features of a property (i.e. bedrooms, bathrooms, acreage, etc) increase its value the most. These are just some rough ideas though.
+&lt;p&gt;I also hope to find a few more uses for this information, likely involving predicting sales data for properties or determining what features of a property (i.e. bedrooms, bathrooms, acreage, etc) increase its value the most. These are just some rough ideas though.
 &lt;/br&gt;&lt;/br&gt;&lt;/p&gt;
-&lt;h3 id=&#34;reading-list&#34;&gt;Reading List&lt;/h3&gt;
-&lt;h4 id=&#34;ethical-issues&#34;&gt;Ethical Issues&lt;/h4&gt;
+&lt;/div&gt;
+&lt;div id=&#34;reading-list&#34; class=&#34;section level3&#34;&gt;
+&lt;h3&gt;Reading List&lt;/h3&gt;
+&lt;div id=&#34;ethical-issues&#34; class=&#34;section level4&#34;&gt;
+&lt;h4&gt;Ethical Issues&lt;/h4&gt;
 &lt;ul&gt;
-&lt;li&gt;
-&lt;a href=&#34;https://towardsdatascience.com/ethics-in-web-scraping-b96b18136f01&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;Ethics in Web Scraping&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;
-&lt;a href=&#34;https://www.apa.org/ethics/code/code-1992&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;Ethical Principles of Psychologists and Code of Conduct&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;
-&lt;a href=&#34;https://link.springer.com/article/10.1023/B:ETIN.0000047476.05912.3d&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;Ethical issues in web data mining&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://towardsdatascience.com/ethics-in-web-scraping-b96b18136f01&#34;&gt;Ethics in Web Scraping&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://www.apa.org/ethics/code/code-1992&#34;&gt;Ethical Principles of Psychologists and Code of Conduct&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://link.springer.com/article/10.1023/B:ETIN.0000047476.05912.3d&#34;&gt;Ethical issues in web data mining&lt;/a&gt;&lt;/li&gt;
 &lt;/ul&gt;
-&lt;h4 id=&#34;technical-reading&#34;&gt;Technical Reading&lt;/h4&gt;
+&lt;/div&gt;
+&lt;div id=&#34;technical-reading&#34; class=&#34;section level4&#34;&gt;
+&lt;h4&gt;Technical Reading&lt;/h4&gt;
 &lt;ul&gt;
-&lt;li&gt;
-&lt;a href=&#34;https://www.postgresqltutorial.com/postgresql-python/&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;PostgreSQL in Python&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;
-&lt;a href=&#34;https://realpython.com/beautiful-soup-web-scraper-python/&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;Beautiful Soup: Build a Web Scraper With Python&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;
-&lt;a href=&#34;https://levelup.gitconnected.com/web-scraping-with-selenium-in-python-8fde2f0fd559&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;Web Scraping with Selenium in Python&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://www.postgresqltutorial.com/postgresql-python/&#34;&gt;PostgreSQL in Python&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://realpython.com/beautiful-soup-web-scraper-python/&#34;&gt;Beautiful Soup: Build a Web Scraper With Python&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://levelup.gitconnected.com/web-scraping-with-selenium-in-python-8fde2f0fd559&#34;&gt;Web Scraping with Selenium in Python&lt;/a&gt;&lt;/li&gt;
 &lt;/ul&gt;
+&lt;/div&gt;
+&lt;/div&gt;
 </description>
     </item>
     

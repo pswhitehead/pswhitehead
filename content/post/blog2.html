@@ -10,7 +10,7 @@
 
 
 
-<meta name="date" content="2020-06-27" />
+<meta name="date" content="2020-07-20" />
 
 <title>Scraping Durham Property Records: Part I</title>
 
@@ -363,13 +363,13 @@ summary {
 
 
 <h1 class="title toc-ignore">Scraping Durham Property Records: Part I</h1>
-<h4 class="date">2020-06-27</h4>
+<h4 class="date">2020-07-20</h4>
 
 </div>
 
 
-<p>This week I decided to write a pretty simple webscraper to collect some property records from the <a href="https://www.dconc.gov/government/departments-f-z/tax-administration/real-estate-appraisal/real-property-record-search">Durham County website</a>. I looked to see if they had an API, but I couldn’t find one, so this seemed like an opportunity to write a short blog about building a quick webscraper (<a href="#reading-list">see here</a> for some of the technical resources I used).</p>
-<p>This script will build a database of property values and information that I can use for future analysis and projects (<a href="#future-uses">some thoughts on future uses</a>). Since I view this as ‘human data’, at least in some part, I’m only going to scrape non-identifiable data (<a href="#reading-list">see here</a> for articles on ethics in data mining); I won’t be collecting the physical address or owner’s name for each property. While I will go over the code here, you can download the python code from <a href="https://github.com/pswhitehead/Durham-Property-Webscraper">my repository here</a>. </br></br></p>
+<p>This week I decided to write a pretty simple webscraper to collect some property records from the <a href="https://www.dconc.gov/government/departments-f-z/tax-administration/real-estate-appraisal/real-property-record-search">Durham County website</a>. I looked to see if they had an API, but I couldn’t find one, so this seemed like an opportunity to write a short blog about building a quick webscraper (reading for <a href="#reading-list">technical resources</a>).</p>
+<p>This script will build a database of property values and information that I can use for future analysis and projects (thoughts on <a href="#future-uses">future uses</a>). Since I view this as ‘human data’, at least in some part, I’m only going to scrape non-identifiable data (articles on <a href="#reading-list">ethics in data mining</a>); I won’t be collecting the physical address or owner’s name for each property. While I will go over the code here, you can download the python code from <a href="https://github.com/pswhitehead/Durham-Property-Webscraper">my repository here</a>. </br></br></p>
 <div id="main-goal" class="section level3">
 <h3>Main Goal</h3>
 <p>The main goal today when building this webscraper is to load and collect relevant property record data from each parcel in Durham county, from the county website, and then input that data in to a <code>PostgreSQL</code> database. Below I will walk through each section of the code to do this. </br></br></p>
@@ -436,42 +436,26 @@ def getpropertydata(i):
         soup_ID = BeautifulSoup(driver.page_source, 'html.parser')
         
         #Find the key info (ki)
-        ki0 = re.findall(r'&gt;(.*?)&lt;', 
-        str(soup_ID.find(id = 'default_overview').findAll('span')[9]))[0] #landuse
-        ki1 = re.findall(r'&gt;(.*?)&lt;', 
-        str(soup_ID.find(id = 'default_overview').findAll('span')[13]))[0] #subdiv
-        ki2 = re.findall(r'&gt;(.*?)&lt;', 
-        str(soup_ID.find(id = 'default_overview').findAll('span')[21]))[0] #saledate
-        ki3 = re.findall(r'&gt;(.*?)&lt;', 
-        str(soup_ID.find(id = 'default_overview').findAll('span')[23]))[0] #saleprice
+        ki0 = re.findall(r'&gt;(.*?)&lt;', str(soup_ID.find(id = 'default_overview').findAll('span')[9]))[0] #landuse
+        ki1 = re.findall(r'&gt;(.*?)&lt;', str(soup_ID.find(id = 'default_overview').findAll('span')[13]))[0] #subdiv
+        ki2 = re.findall(r'&gt;(.*?)&lt;', str(soup_ID.find(id = 'default_overview').findAll('span')[21]))[0] #saledate
+        ki3 = re.findall(r'&gt;(.*?)&lt;', str(soup_ID.find(id = 'default_overview').findAll('span')[23]))[0] #saleprice
         
         #Find the buildinfo (bi)
-        bi0 = re.findall(r'&gt;(.*?)&lt;', 
-        str(soup_ID.find(id = 'default_buildings').findAll('span')[-1]))[0] #value
-        bi1 = re.findall(r'&gt;(.*?)&lt;', 
-        str(soup_ID.find(id = 'default_buildings').findAll('span')[4]))[0] #year built
-        bi2 = re.findall(r'&gt;(.*?)&lt;', 
-        str(soup_ID.find(id = 'default_buildings').findAll('span')[13]))[0] #area
-        bi3 = re.findall(r'&gt;(.*?)&lt;', 
-        str(soup_ID.find(id = 'default_buildings').findAll('span')[15]))[0] #bathrooms
-        bi4 = re.findall(r'&gt;(.*?)&lt;', 
-        str(soup_ID.find(id = 'default_buildings').findAll('span')[19]))[0] #bedrooms
-        bi5 = re.findall(r'&gt;(.*?)&lt;', 
-        str(soup_ID.find(id = 'default_buildings').findAll('span')[8]))[0] #use
-        bi6 = re.findall(r'&gt;(.*?)&lt;', 
-        str(soup_ID.find(id = 'default_buildings').findAll('span')[6]))[0] #builduse
+        bi0 = re.findall(r'&gt;(.*?)&lt;', str(soup_ID.find(id = 'default_buildings').findAll('span')[-1]))[0] #value
+        bi1 = re.findall(r'&gt;(.*?)&lt;', str(soup_ID.find(id = 'default_buildings').findAll('span')[4]))[0] #year built
+        bi2 = re.findall(r'&gt;(.*?)&lt;', str(soup_ID.find(id = 'default_buildings').findAll('span')[13]))[0] #area
+        bi3 = re.findall(r'&gt;(.*?)&lt;', str(soup_ID.find(id = 'default_buildings').findAll('span')[15]))[0] #bathrooms
+        bi4 = re.findall(r'&gt;(.*?)&lt;', str(soup_ID.find(id = 'default_buildings').findAll('span')[19]))[0] #bedrooms
+        bi5 = re.findall(r'&gt;(.*?)&lt;', str(soup_ID.find(id = 'default_buildings').findAll('span')[8]))[0] #use
+        bi6 = re.findall(r'&gt;(.*?)&lt;', str(soup_ID.find(id = 'default_buildings').findAll('span')[6]))[0] #builduse
 
         #Find the assessment details (ad)
-        ad0 = re.findall(r'&gt;(.*?)&lt;', 
-        str(soup_ID.find(id = 'LandDetails').findAll('td')[0]))[0] #fair market value
-        ad1 = re.findall(r'&gt;(.*?)&lt;', 
-        str(soup_ID.find(id = 'LandDetails').findAll('td')[1]))[0] #land assessed value
-        ad2 = re.findall(r'&gt;(.*?)&lt;', 
-        str(soup_ID.find(id = 'LandDetails').findAll('td')[2]))[0] #acres
-        ad3 = re.findall(r'&gt;(.*?)&lt;', 
-        str(soup_ID.find(id = 'default_overview').findAll('span')[-3]))[0] #improvement
-        ad4 = re.findall(r'&gt;(.*?)&lt;', 
-        str(soup_ID.find(id = 'default_overview').findAll('span')[-1]))[0] #totalfmv
+        ad0 = re.findall(r'&gt;(.*?)&lt;', str(soup_ID.find(id = 'LandDetails').findAll('td')[0]))[0] #fair market value
+        ad1 = re.findall(r'&gt;(.*?)&lt;', str(soup_ID.find(id = 'LandDetails').findAll('td')[1]))[0] #land assessed value
+        ad2 = re.findall(r'&gt;(.*?)&lt;', str(soup_ID.find(id = 'LandDetails').findAll('td')[2]))[0] #acres
+        ad3 = re.findall(r'&gt;(.*?)&lt;', str(soup_ID.find(id = 'default_overview').findAll('span')[-3]))[0] #improvement
+        ad4 = re.findall(r'&gt;(.*?)&lt;', str(soup_ID.find(id = 'default_overview').findAll('span')[-1]))[0] #totalfmv
         
         #write sql code to insert
         sqltemp_ki = &quot;&quot;&quot;INSERT INTO keyinfo(landuse,subdiv,saledate,saleprice,id)
@@ -502,7 +486,7 @@ sqlsuccess = sql.SQL(&quot;UPDATE scrapeprog SET status = 1 WHERE id = ({})&quot
 
 #Update the ID status to 0 = fail
 sqlfail = sql.SQL(&quot;UPDATE scrapeprog SET status = 0 WHERE id = ({})&quot;).format(sql.Literal(str(j[0])))</code></pre>
-<p>Now we run the <code>getpropertydata</code> function in a while loop until there are no ‘pending’ ID values in the <code>scrapeprog</code> table.</p>
+<p>Now we run the <code>getpropertydata()</code> function in a while loop until there are no ‘pending’ ID values in the <code>scrapeprog</code> SQL table.</p>
 <pre class="python"><code>##Run this in a while loop until it cant run no more!##
 while findsql()[0][1] == 2: #i.e. while status is pending = 2
     j = findsql()[0] #where the 0th index is the id, and the 1st is the status
