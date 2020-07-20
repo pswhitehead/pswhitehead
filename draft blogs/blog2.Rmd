@@ -1,0 +1,231 @@
+---
+title: "HMDA Loan Application - An SQL exercise"
+tags: ['SQL', 'R', 'Postgres', 'HMDA', 'linear model']
+date: "2020-06-27"
+draft: true
+---
+
+Today we are going to look at soccer stuff.
+
+We are going ask two questions of this dataset today, and use SQL to query the dataset.
+</br></br>
+
+### Question 1
+Which leages are more similar
+
+#### Step 1
+First we need to connect our R notebook to the local SQL database. Thankfully, with the `RPostgres` and `DBI` packages, it is exceedingly simple to connect it to R in notebooks. 
+```{r, warning = FALSE, message = FALSE}
+#I always try to load all the packages I expect to use first and try to properly set up my R environment
+library(DBI) #load the database interface package
+library(dplyr) #load dplyr for later
+library(ggplot2) # we will plot later
+library(bootnet)
+
+#all the below settings can be changed to work with cloud databases as well
+con <- dbConnect(RMySQL::MySQL(), #you'll need RPostgres for R to talk to PostgreSQL
+                 dbname = 'irs_soi', #this is database I created
+                 host = '127.0.0.1', #currently I have this saved locally
+                 port = 3306, #localport
+                 user = 'root')
+```
+
+#### Step 2
+Now that we are connected to the database, we can send SQL queries in R either through SQL defined code chunks or sending commands in R code chunks using `tbl()`. I'm going to opt for the former because I like to keep my languages seperate in my notebooks as much as possible. 
+
+In this first query, we are going pull data for the primary applicant's race, what action was taken on the loan application, and then compute the percent of applicantion outcomes by race, specifically only when there was no reason given for denial (if it was denied). I'm going to also involve some computations in my SQL query, so that it will calculate the average outcome (i.e. ACTIONTYPE) for an application by race (see the second line of code). 
+
+As a quick technical note for the code, make sure the code chunk header looks like this: `{sql, connection=con, output.var="df.q1"}`. Here I have connected the code chunk to the database variable, and then I save the output of the SQL query to a variable I can plot later in `ggplot2`. 
+```{sql, connection=con, output.var="df.q1"}
+SELECT *
+FROM allnoagi;
+```
+
+```{r}
+EGA <- function(data, model = c("glasso", "TMFG"), plot.EGA = TRUE, 
+                n = NULL, steps = 4, threshold = F) {
+  #this is just going to install qgraph and igraph if you don't have them
+  if(!require(qgraph)) {
+    message("installing the 'qgraph' package")
+    install.packages("qgraph")
+  }
+  
+  if(!require(igraph)) {
+    message("installing the 'igraph' package")
+    install.packages("igraph")
+  }
+  
+  if(!require(NetworkToolbox)) {
+    message("installing the 'NetworkToolbox' package")
+    install.packages("NetworkToolbox")
+  }
+  {
+    if(is.null(model)){
+      model = "glasso"
+    }
+    #here is where things get fun
+    if(!is.matrix(data)){
+      data <- as.data.frame(data)
+      if(model == "glasso"){
+        #The bootnet package and command 'estimateNetwork' uses the EBICglasso function 
+        #from qgraph/igraph given a partial correlation matrix.
+        
+        cor.data <- cor_auto(data) #find partial correlations
+        
+        #Estimate the network using EBIC glasso. Here I changed the minimum lambda ratio, 
+        #nlamba, gamma, and added a threshold option so that we can match the output 
+        #from bootnet.
+        estimated.network <- EBICglasso(S = cor.data, n = n, lambda.min.ratio = 0.01, 
+                                        nlambda = 100, threshold = threshold,
+                                        gamma = 0.5, refit = F)
+      } else if(model == "TMFG"){
+        cor.data <- cor(data)
+        estimated.network <- TMFG(data)$A
+        
+      }
+    } else if(is.matrix(data)){
+      cor.data <- cor_auto(data)
+      if(model == "glasso"){
+        #same as above
+        estimated.network <- EBICglasso(S = cor.data, n = n, lambda.min.ratio = 0.01, 
+                                        nlambda = 100, threshold = threshold,
+                                        gamma = 0.5, refit = F)
+      } else if(model == "TMFG"){
+        estimated.network <- TMFG(data)$A
+      }
+    }
+  }
+  
+  graph <- as.igraph(qgraph(abs(estimated.network), layout = "spring", 
+                            vsize = 4, DoNotPlot = TRUE))
+  
+  #Only here is where the function computes the community structure.
+  #They use the walktrap algorithm, which tries to find short paths 
+  #between nodes using random walks.
+  wc <- walktrap.community(graph, steps = steps)
+  n.dim <- max(wc$membership)
+  a <- list()
+  a$n.dim <- n.dim
+  a$correlation <- cor.data
+  a$network <- estimated.network
+  a$wc <- wc$membership
+  dim.variables <- data.frame(items = colnames(data), dimension = a$wc)
+  dim.variables <- dim.variables[order(dim.variables[, 2]), ]
+  a$dim.variables <- dim.variables
+  class(a) <- "EGA"
+  if (plot.EGA == TRUE) {
+    plot.ega <- qgraph(estimated.network, layout = "spring", 
+                       groups = as.factor(wc$membership))
+  }
+  return(a)
+}
+```
+#### Step 3
+Now instead of just printing out a table, let's plot the results for an easier interpretation. 
+```{r}
+gini <- df.q2 %>%
+  filter(zip != '00000', zip != '99999', state == 'NY'|state == 'CA'|state == 'TX'|state == 'FL'|
+                         state == 'IL'|state == 'PA'|state == 'GA'|state == 'OH', adjusted_gross_income > 0) %>%
+  select(agi_category, zip, adjusted_gross_income, total_income_count,total_income_amount, state) %>%
+  group_by(state, zip) %>%
+  mutate(income = adjusted_gross_income/total_income_count, popsum = sum(total_income_count)) %>%
+  do(gini = summary(
+    lm(scale(as.numeric(as.character(total_income_amount))) ~ as.numeric(as.character((agi_category)))^2, 
+                       data = ., weights=as.numeric(as.character(total_income_count))))$coefficients[[2]]) %>%
+  ungroup()
+
+plot(as.numeric(as.character(gini$gini)))
+
+
+```
+
+```{r}
+library(lme4)
+summary(nls((agi_category) ~ (adjusted_gross_income), data = df.q2[7:12,], weights=df.q2[7:12,]$total_income_count))$coefficients[[2]]
+plot(as.numeric(as.character(gini$gini)))
+
+datatest<-df.q2[7:12,] %>% mutate(adjusted_gross_income=(adjusted_gross_income))
+model <- nls((total_income_count) ~ exp(adjusted_gross_income), start=list(adjusted_gross_income=0),
+    data = datatest)
+
+plot((datatest$agi_category)^2,(datatest$adjusted_gross_income))
+lines(datatest$adjusted_gross_income,predict(model),col="red")
+```
+
+```{r}
+df.q1 <- df.q1 %>% arrange(state, zip)
+
+df <- df.q1 %>% filter(zip != "00000",zip != '99999', state == 'NY'|state == 'CA'|state == 'TX'|state == 'FL'|
+                         state == 'IL'|state == 'PA'|state == 'GA'|state == 'OH') %>%
+  mutate(statenum = ifelse(state == 'NY', 1, ifelse(state == 'CA', 2, ifelse(state == 'FL', 3, 4)))) %>%
+  select(ordinary_dividends_amount, business_or_pro_net_income_amount, 
+                       net_cap_gains_amount, taxable_interest_amount, taxable_indiv_retirement_amount,
+                       unemployment_compensation_amount, student_loan_interest_amount, itemized_deductions_amount,
+                       itemized_deductions_count, state_and_local_general_sales_tax_amount, state_and_local_income_tax_amount,
+                       investment_interest_paid_amount, qualified_dividend_amount) %>%
+  mutate(gini = as.numeric(gini$gini))
+
+colnames(df) <- c("ODA", "BIA","NCG","TIA","TRA","UCA","SLI","IDA","IDC","SST","SIT","IIA", "QDA", "GINI")
+
+test <- df.q1[,5:150]
+```
+
+
+```{r}
+ega <- EGA(df, model = "glasso", plot.EGA = FALSE, 
+           n = nrow(df), steps = 4, threshold = T)
+
+
+qgraph(ega$network, layout = "spring", 
+                       groups = as.factor(ega$wc))
+```
+
+Each bar for race adds up to 100% because we want to know what happens to applications as a funciton of race, but we need to account for different base rates of applications. Therefore, looking at the outcome for applications as a percent value for each race lets us do between-race comparisons. 
+
+#### What does this mean?
+* Most people (I hope) won't be surprised (but dissapointed) to see that the percent of White applicants with approved loan applications is higher than most other racial demographics. This is especially true for Black applicants and American Indian/Alaska Native applicants, but also for Native Hawaiian/Pacific Islander applicants. 
+
+* Here is where interpretting data is especially important. You should also notice that in purple we see that the percent of applicants who are denied, **for no given reason**, is much larger for Black and American Indian/Alaska Native appicants. 
+
+* This leads us to further questions we might want to start asking (and that some researchers have written on [see](#reading-list)); why are Black and American Indian/Alaska Native applicants being denied at higher rates than White applicants for no stated reasons? 
+</br></br>
+
+### Question 2
+In Durham County, NC, is the income of accepted loan applications different based on race? 
+
+#### Step 1
+Here, I will change my output variable to reflect I am asking a new question: `{sql, connection=con, output.var="df.q2"}`. Here we can ask SQL to turn the income variable to a numeric value we can average over using `CAST`. This will throw an error if we don't remove the NA values from INCOME in our join. 
+```{sql, connection=con, output.var="df.q2"}
+SELECT RACE1, AVG(CAST(INCOME AS NUMERIC))
+FROM hmda
+WHERE STATE='37' AND COUNTY='063' AND ACTIONTYPE = '1' AND INCOME <> 'NA'
+GROUP BY RACE1;
+```
+
+#### Step 2
+Now let's plot the results of the SQL query. The code for the plot here is pretty similar to above, so I've hidden it this time. 
+```{r, echo = FALSE}
+ggplot(df.q2 %>% filter(race1 != 6, race1 != 7), #get rid of race when (1) not applicable and (2) when not provided by applicant
+       aes(x = race1, y = avg*1000, 
+           group = race1)) +
+  geom_bar(stat = 'identity', color = "black") +
+  ylab("Average income") + xlab("Race") + #set axis labels
+  scale_x_discrete(labels = c("American Indian \nAlaska Native",
+                              "Asian",
+                              "Black \nAfrican American",
+                              "Native Hawaiian \n Pacific Islander",
+                              "White")) +
+  theme_bw() + #set of design elements that look nice
+  theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1)) #angle the x-axis labels to fit
+```
+
+#### What does this mean?
+
+</br></br>
+
+### Why am I doing this?
+
+</br></br>
+
+### Reading List
+

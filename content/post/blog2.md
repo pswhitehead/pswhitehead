@@ -1,0 +1,178 @@
+---
+title: "Scraping Durham Property Records: Part I"
+tags: ['SQL', 'python', 'PostgreSQL', 'webscraping', 'housing', 'multi-part blog']
+date: "2020-07-20"
+draft: false
+---
+
+This week I decided to write a pretty simple webscraper to collect some property records from the [Durham County website](https://www.dconc.gov/government/departments-f-z/tax-administration/real-estate-appraisal/real-property-record-search). I looked to see if they had an API, but I couldn't find one, so this seemed like an opportunity to write a short blog about building a quick webscraper (reading for [technical resources](#reading-list)). 
+
+This script will build a database of property values and information that I can use for future analysis and projects (thoughts on [future uses](#future-uses)). Since I view this as 'human data', at least in some part, I'm only going to scrape non-identifiable data (articles on [ethics in data mining](#reading-list)); I won't be collecting the physical address or owner's name for each property. While I will go over the code here, you can download the python code from [my repository here](https://github.com/pswhitehead/Durham-Property-Webscraper). 
+</br></br>
+
+### Main Goal
+The main goal today when building this webscraper is to load and collect relevant property record data from each parcel in Durham county, from the county website, and then input that data in to a `PostgreSQL` database. Below I will walk through each section of the code to do this.
+</br></br>
+
+#### Step 1
+We need to import all the libraries we need for this project. I am using `Selenium` ([link](https://selenium-python.readthedocs.io/)), as the website I'm scraping from needs to load up the webpage for us to eb able to scrape the information (link about that here). I also chose to use `psycopg2` ([link](https://www.psycopg.org/docs/)) to interact with the `PostgreSQL` database I created for this project. If you need to install `Selenium` ir `psycopg2`, it's pretty easy to do via `Anaconda` ([link](https://www.anaconda.com/)).
+
+```python
+####Import the libraries we need####
+import numpy as np
+from selenium import webdriver
+from bs4 import BeautifulSoup
+import time
+import re
+from selenium.webdriver.firefox.options import Options
+import psycopg2
+from psycopg2 import sql
+```
+</br></br>
+
+#### Step 2
+Once we have the libraries loaded up we are going to write the functions we need both to interact with the SQL database as well as scrape the data from the county website.
+
+In the SQL database I created, I have a table -- `scrapeprog` -- that contains all the url IDs and a status variable for each, currently set to 2 which will represent a 'pending' status here. This first SQL call function is going to allow us to run the .py script without needing to give an input by querying the `scrapeprog` table in our SQL database to see which url ID we haven't tried to scrape yet. 
+
+```python
+##To query what we need to scrape yet##
+def findsql():    
+    #Set up a connection to the PostgresSQL server we'll write data to
+    conn = psycopg2.connect(host="localhost",database="durhamprop", user="postgres", password="postgres")
+    cur = conn.cursor()
+    
+    #Write an sql query
+    query = sql.SQL("SELECT * FROM {table} WHERE {key} = 2 LIMIT 1").format(
+        table=sql.Identifier('scrapeprog'),
+        key=sql.Identifier('status'))
+    
+    #execute query
+    cur.execute(query)
+    return cur.fetchall()
+```
+
+The second SQL call function will allow us to insert and edit data in the SQL database.
+
+```python
+##To make sql calls to insert and change data##
+def callsql(command, data = None):
+    #Set up a connection to the PostgresSQL server we'll write data to
+    conn = psycopg2.connect(host="localhost",database="durhamprop", user="postgres", password="postgres")
+    cur = conn.cursor()
+    
+    #execute the query
+    if data == None:
+        cur.execute(command)
+    else:
+        cur.execute(command, data)
+    conn.commit()  
+```
+
+The third function I wrote allows us to load a webpage from the county's property records site and scrape the data we want to put in the SQL database
+
+```python
+##To scrape the data from each property##
+def getpropertydata(i):  
+    #Setp up the website we'll scrape data from
+    url = ["https://property.spatialest.com/nc/durham/#/property/"+str(i)]
+    
+    #Set up the Selenium web driver and then call the URL
+    options = Options()
+    options.headless = True #I don't want to open a physical window each tme
+    driver = webdriver.Firefox(options=options)
+    driver.get(url[0])
+    time.sleep(2) #Because we are loading the page, I wait a few seconds before the next command
+    
+    if driver.current_url == url[0]: #check the status isn't 404  or redirected before we scrape the info
+        #Parse the html
+        soup_ID = BeautifulSoup(driver.page_source, 'html.parser')
+        
+        #Find the key info (ki)
+        ki0 = re.findall(r'>(.*?)<', str(soup_ID.find(id = 'default_overview').findAll('span')[9]))[0] #landuse
+        ki1 = re.findall(r'>(.*?)<', str(soup_ID.find(id = 'default_overview').findAll('span')[13]))[0] #subdiv
+        ki2 = re.findall(r'>(.*?)<', str(soup_ID.find(id = 'default_overview').findAll('span')[21]))[0] #saledate
+        ki3 = re.findall(r'>(.*?)<', str(soup_ID.find(id = 'default_overview').findAll('span')[23]))[0] #saleprice
+        
+        #Find the buildinfo (bi)
+        bi0 = re.findall(r'>(.*?)<', str(soup_ID.find(id = 'default_buildings').findAll('span')[-1]))[0] #value
+        bi1 = re.findall(r'>(.*?)<', str(soup_ID.find(id = 'default_buildings').findAll('span')[4]))[0] #year built
+        bi2 = re.findall(r'>(.*?)<', str(soup_ID.find(id = 'default_buildings').findAll('span')[13]))[0] #area
+        bi3 = re.findall(r'>(.*?)<', str(soup_ID.find(id = 'default_buildings').findAll('span')[15]))[0] #bathrooms
+        bi4 = re.findall(r'>(.*?)<', str(soup_ID.find(id = 'default_buildings').findAll('span')[19]))[0] #bedrooms
+        bi5 = re.findall(r'>(.*?)<', str(soup_ID.find(id = 'default_buildings').findAll('span')[8]))[0] #use
+        bi6 = re.findall(r'>(.*?)<', str(soup_ID.find(id = 'default_buildings').findAll('span')[6]))[0] #builduse
+
+        #Find the assessment details (ad)
+        ad0 = re.findall(r'>(.*?)<', str(soup_ID.find(id = 'LandDetails').findAll('td')[0]))[0] #fair market value
+        ad1 = re.findall(r'>(.*?)<', str(soup_ID.find(id = 'LandDetails').findAll('td')[1]))[0] #land assessed value
+        ad2 = re.findall(r'>(.*?)<', str(soup_ID.find(id = 'LandDetails').findAll('td')[2]))[0] #acres
+        ad3 = re.findall(r'>(.*?)<', str(soup_ID.find(id = 'default_overview').findAll('span')[-3]))[0] #improvement
+        ad4 = re.findall(r'>(.*?)<', str(soup_ID.find(id = 'default_overview').findAll('span')[-1]))[0] #totalfmv
+        
+        #write sql code to insert
+        sqltemp_ki = """INSERT INTO keyinfo(landuse,subdiv,saledate,saleprice,id)
+             VALUES(%s,%s,%s,%s,%s);"""
+        
+        sqltemp_bi = """INSERT INTO buildinfo(value,year,area,bathrooms,bedrooms,use,builduse,id)
+             VALUES(%s,%s,%s,%s,%s,%s,%s,%s);"""
+        
+        sqltemp_ad = """INSERT INTO assessment(fmv,lav,acres,improvement,totalfmv,id)
+             VALUES(%s,%s,%s,%s,%s,%s);"""
+        
+        #insert data in to sql
+        callsql(sqltemp_ki, [ki0,ki1,ki2,ki3,i])
+        callsql(sqltemp_bi, [bi0,bi1,bi2,bi3,bi4,bi5,bi6,i])
+        callsql(sqltemp_ad, [ad0,ad1,ad2,ad3,ad4,i])
+    
+    driver.quit()  
+```
+</br></br>
+
+#### Step 3
+Now we are ready to run these functions and start collecting some data to put in to our database for later.
+
+Before we start, we are going to define to sql queries to update the status in out `scrapeprog` table, to let us know if we scraped the data successfully or not.
+
+```python
+##Define the calls for if we sucessfully/un scrape data##
+
+#Update the ID status to 1 = success
+sqlsuccess = sql.SQL("UPDATE scrapeprog SET status = 1 WHERE id = ({})").format(sql.Literal(str(j[0])))
+
+#Update the ID status to 0 = fail
+sqlfail = sql.SQL("UPDATE scrapeprog SET status = 0 WHERE id = ({})").format(sql.Literal(str(j[0])))
+```
+
+Now we run the `getpropertydata()` function in a while loop until there are no 'pending' ID values in the `scrapeprog` SQL table.
+
+```python
+##Run this in a while loop until it cant run no more!##
+while findsql()[0][1] == 2: #i.e. while status is pending = 2
+    j = findsql()[0] #where the 0th index is the id, and the 1st is the status
+    try:
+        getpropertydata(j[0]) 
+        callsql(sqlsuccess)
+    except:
+        print(j[0]) #just a nice visual as we go
+        callsql(sqlfail)  
+```
+</br></br>
+
+### Future Uses
+In another blog post sometime, I am going to use the data I collected to run an isolation forest algorithm to detect outliers in the assessment value of each property, based on the features of each property. These outliers could be due to errors in data input (the county website has a disclaimer regarding this), human error in the assessment of a property, or particularly odd properties that have unknown features not captured in the property tax records. 
+
+I also hope to find a few more uses for this information, likely involving predicting sales data for properties or determining what features of a property (i.e. bedrooms, bathrooms, acreage, etc) increase its value the most. These are just some rough ideas though. 
+</br></br>
+
+### Reading List
+
+#### Ethical Issues
+* [Ethics in Web Scraping](https://towardsdatascience.com/ethics-in-web-scraping-b96b18136f01)
+* [Ethical Principles of Psychologists and Code of Conduct](https://www.apa.org/ethics/code/code-1992)
+* [Ethical issues in web data mining](https://link.springer.com/article/10.1023/B:ETIN.0000047476.05912.3d)
+
+#### Technical Reading
+* [PostgreSQL in Python](https://www.postgresqltutorial.com/postgresql-python/)
+* [Beautiful Soup: Build a Web Scraper With Python](https://realpython.com/beautiful-soup-web-scraper-python/)
+* [Web Scraping with Selenium in Python](https://levelup.gitconnected.com/web-scraping-with-selenium-in-python-8fde2f0fd559)

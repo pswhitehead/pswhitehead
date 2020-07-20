@@ -27,10 +27,10 @@
   
     
   
-  <meta name="description" content="Today we are going to use HMDA loan application data to look at the relationship between different demographic features of borrowers when applying for a loan, and how that impacts eventual loan acceptance or denial in 2008.">
+  <meta name="description" content="This week I decided to write a pretty simple webscraper to collect some property records from the Durham County website. I looked to see if they had an API, but I couldn&rsquo;t find one, so this seemed like an opportunity to write a short blog about building a quick webscraper (reading for technical resources).">
 
   
-  <link rel="alternate" hreflang="en-us" href="/post/blog1/">
+  <link rel="alternate" hreflang="en-us" href="/post/blog2/">
 
   
 
@@ -217,7 +217,7 @@
   <link rel="icon" type="image/png" href="/images/icon_hu8001a07fc39adc97ccd024efda7dbc16_12171_32x32_fill_lanczos_center_2.png">
   <link rel="apple-touch-icon" type="image/png" href="/images/icon_hu8001a07fc39adc97ccd024efda7dbc16_12171_192x192_fill_lanczos_center_2.png">
 
-  <link rel="canonical" href="/post/blog1/">
+  <link rel="canonical" href="/post/blog2/">
 
   
   
@@ -233,15 +233,15 @@
   <meta property="twitter:card" content="summary">
   
   <meta property="og:site_name" content="">
-  <meta property="og:url" content="/post/blog1/">
-  <meta property="og:title" content="HMDA Loan Application - An SQL exercise | ">
-  <meta property="og:description" content="Today we are going to use HMDA loan application data to look at the relationship between different demographic features of borrowers when applying for a loan, and how that impacts eventual loan acceptance or denial in 2008."><meta property="og:image" content="/images/icon_hu8001a07fc39adc97ccd024efda7dbc16_12171_512x512_fill_lanczos_center_2.png">
+  <meta property="og:url" content="/post/blog2/">
+  <meta property="og:title" content="Scraping Durham Property Records: Part I | ">
+  <meta property="og:description" content="This week I decided to write a pretty simple webscraper to collect some property records from the Durham County website. I looked to see if they had an API, but I couldn&rsquo;t find one, so this seemed like an opportunity to write a short blog about building a quick webscraper (reading for technical resources)."><meta property="og:image" content="/images/icon_hu8001a07fc39adc97ccd024efda7dbc16_12171_512x512_fill_lanczos_center_2.png">
   <meta property="twitter:image" content="/images/icon_hu8001a07fc39adc97ccd024efda7dbc16_12171_512x512_fill_lanczos_center_2.png"><meta property="og:locale" content="en-us">
   
     
-      <meta property="article:published_time" content="2020-06-27T00:00:00&#43;00:00">
+      <meta property="article:published_time" content="2020-07-20T00:00:00&#43;00:00">
     
-    <meta property="article:modified_time" content="2020-06-27T00:00:00&#43;00:00">
+    <meta property="article:modified_time" content="2020-07-20T00:00:00&#43;00:00">
   
 
   
@@ -265,12 +265,12 @@
   "@type": "BlogPosting",
   "mainEntityOfPage": {
     "@type": "WebPage",
-    "@id": "/post/blog1/"
+    "@id": "/post/blog2/"
   },
-  "headline": "HMDA Loan Application - An SQL exercise",
+  "headline": "Scraping Durham Property Records: Part I",
   
-  "datePublished": "2020-06-27T00:00:00Z",
-  "dateModified": "2020-06-27T00:00:00Z",
+  "datePublished": "2020-07-20T00:00:00Z",
+  "dateModified": "2020-07-20T00:00:00Z",
   
   "author": {
     "@type": "Person",
@@ -285,7 +285,7 @@
       "url": "/images/icon_hu8001a07fc39adc97ccd024efda7dbc16_12171_192x192_fill_lanczos_center_2.png"
     }
   },
-  "description": "Today we are going to use HMDA loan application data to look at the relationship between different demographic features of borrowers when applying for a loan, and how that impacts eventual loan acceptance or denial in 2008."
+  "description": "This week I decided to write a pretty simple webscraper to collect some property records from the Durham County website. I looked to see if they had an API, but I couldn\u0026rsquo;t find one, so this seemed like an opportunity to write a short blog about building a quick webscraper (reading for technical resources)."
 }
 </script>
 
@@ -303,7 +303,7 @@
 
 
 
-  <title>HMDA Loan Application - An SQL exercise | </title>
+  <title>Scraping Durham Property Records: Part I | </title>
 
 </head>
 <body id="top" data-spy="scroll" data-offset="70" data-target="#TableOfContents" >
@@ -598,7 +598,7 @@
   
   
 <div class="article-container pt-3">
-  <h1>HMDA Loan Application - An SQL exercise</h1>
+  <h1>Scraping Durham Property Records: Part I</h1>
 
   
 
@@ -617,7 +617,7 @@
     
       
     
-    Jun 27, 2020
+    Jul 20, 2020
   </span>
   
 
@@ -626,7 +626,7 @@
   
   <span class="middot-divider"></span>
   <span class="article-reading-time">
-    7 min read
+    6 min read
   </span>
   
 
@@ -662,118 +662,168 @@
   <div class="article-container">
 
     <div class="article-style">
-      
-
-
-<p>Today we are going to use HMDA loan application data to look at the relationship between different demographic features of borrowers when applying for a loan, and how that impacts eventual loan acceptance or denial in 2008. We are also going to look at how these demographic factors interact with different reasons given for loan denial. Before we begin, this is just a quick example of using SQL databases in your analysis pipelines, so while we are looking at real data about real people, other researchers and scholars have done a lot more complex and interesting work on this topic and I encourage you to check them out (<a href="#reading-list">click here for reading list</a>).</p>
-<p>We are going ask two questions of this dataset today, and use SQL to query the dataset.
+      <p>This week I decided to write a pretty simple webscraper to collect some property records from the 
+<a href="https://www.dconc.gov/government/departments-f-z/tax-administration/real-estate-appraisal/real-property-record-search" target="_blank" rel="noopener">Durham County website</a>. I looked to see if they had an API, but I couldn&rsquo;t find one, so this seemed like an opportunity to write a short blog about building a quick webscraper (reading for 
+<a href="#reading-list">technical resources</a>).</p>
+<p>This script will build a database of property values and information that I can use for future analysis and projects (thoughts on 
+<a href="#future-uses">future uses</a>). Since I view this as &lsquo;human data&rsquo;, at least in some part, I&rsquo;m only going to scrape non-identifiable data (articles on 
+<a href="#reading-list">ethics in data mining</a>); I won&rsquo;t be collecting the physical address or owner&rsquo;s name for each property. While I will go over the code here, you can download the python code from 
+<a href="https://github.com/pswhitehead/Durham-Property-Webscraper" target="_blank" rel="noopener">my repository here</a>.
 </br></br></p>
-<div id="question-1" class="section level3">
-<h3>Question 1</h3>
-<p>In Durham County, NC, does an applicant’s race affect loan denial rates, when no reason for denial is given?</p>
-<div id="step-1" class="section level4">
-<h4>Step 1</h4>
-<p>First we need to connect our R notebook to the local SQL database. Thankfully, with the <code>RPostgres</code> and <code>DBI</code> packages, it is exceedingly simple to connect it to R in notebooks.</p>
-<pre class="r"><code>#I always try to load all the packages I expect to use first and try to properly set up my R environment
-library(DBI) #load the database interface package
-library(dplyr) #load dplyr for later
-library(ggplot2) # we will plot later
-
-#all the below settings can be changed to work with cloud databases as well
-con &lt;- dbConnect(RPostgres::Postgres(), #you&#39;ll need RPostgres for R to talk to PostgreSQL
-                 dbname = &#39;mortgages&#39;, #this is database I created
-                 host = &#39;localhost&#39;, #currently I have this saved locally
-                 port = 5432, #localport
-                 user = &#39;postgres&#39;)</code></pre>
-</div>
-<div id="step-2" class="section level4">
-<h4>Step 2</h4>
-<p>Now that we are connected to the database, we can send SQL queries in R either through SQL defined code chunks or sending commands in R code chunks using <code>tbl()</code>. I’m going to opt for the former because I like to keep my languages seperate in my notebooks as much as possible.</p>
-<p>In this first query, we are going pull data for the primary applicant’s race, what action was taken on the loan application, and then compute the percent of applicantion outcomes by race, specifically only when there was no reason given for denial (if it was denied). I’m going to also involve some computations in my SQL query, so that it will calculate the average outcome (i.e. ACTIONTYPE) for an application by race (see the second line of code).</p>
-<p>As a quick technical note for the code, make sure the code chunk header looks like this: <code>{sql, connection=con, output.var=&quot;df.q1&quot;}</code>. Here I have connected the code chunk to the database variable, and then I save the output of the SQL query to a variable I can plot later in <code>ggplot2</code>.</p>
-<pre class="sql"><code>SELECT RACE1, ACTIONTYPE, 
-      COUNT(*) * 100.0 / SUM(COUNT(*)) OVER(PARTITION BY RACE1) AS Percentage
-FROM hmda
-WHERE STATE=&#39;37&#39; AND COUNTY=&#39;063&#39; AND DENIAL1 = &#39;&#39;
-GROUP BY ACTIONTYPE, RACE1;</code></pre>
-</div>
-<div id="step-3" class="section level4">
-<h4>Step 3</h4>
-<p>Now instead of just printing out a table, let’s plot the results for an easier interpretation.</p>
-<pre class="r"><code>ggplot(df.q1 %&gt;% filter(race1 != 6, race1 != 7), #get rid of race when (1) not applicable and (2) when not provided by applicant
-       aes(x = race1, y = percentage, 
-           group = interaction(race1, factor(actiontype)), 
-           fill = factor(actiontype))) +
-  geom_bar(stat = &#39;identity&#39;, color = &quot;black&quot;) + 
-  ylab(&quot;Percent of applications (%)&quot;) + xlab(&quot;Race&quot;) + #set axis labels
-  scale_fill_brewer(palette=&quot;Dark2&quot;, #use a default color scheme and set labels
-                    name=&quot;Action to Loan Application&quot;, 
-                    label = c(&quot;Loan Originated&quot;,
-                              &quot;Application approaced but not accepted&quot;,
-                              &quot;Application denied by financial institution&quot;,
-                              &quot;Application withdrawn by applicant&quot;,
-                              &quot;File closed for incompleteness&quot;,
-                              &quot;Loan purchased by institution&quot;)) +
-  scale_x_discrete(labels = c(&quot;American Indian \nAlaska Native&quot;,
-                              &quot;Asian&quot;,
-                              &quot;Black \nAfrican American&quot;,
-                              &quot;Native Hawaiian \n Pacific Islander&quot;,
-                              &quot;White&quot;)) +
-  theme_bw() + #set of design elements that look nice
-  theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1)) #angle the x-axis labels to fit</code></pre>
-<p><img src="/post/blog1_files/figure-html/unnamed-chunk-3-1.png" width="672" /></p>
-<p>Each bar for race adds up to 100% because we want to know what happens to applications as a funciton of race, but we need to account for different base rates of applications. Therefore, looking at the outcome for applications as a percent value for each race lets us do between-race comparisons.</p>
-</div>
-<div id="what-does-this-mean" class="section level4">
-<h4>What does this mean?</h4>
-<ul>
-<li><p>Most people (I hope) won’t be surprised (but dissapointed) to see that the percent of White applicants with approved loan applications is higher than most other racial demographics. This is especially true for Black applicants and American Indian/Alaska Native applicants, but also for Native Hawaiian/Pacific Islander applicants.</p></li>
-<li><p>Here is where interpretting data is especially important. You should also notice that in purple we see that the percent of applicants who are denied, <strong>for no given reason</strong>, is much larger for Black and American Indian/Alaska Native appicants.</p></li>
-<li><p>This leads us to further questions we might want to start asking (and that some researchers have written on <a href="#reading-list">see</a>); why are Black and American Indian/Alaska Native applicants being denied at higher rates than White applicants for no stated reasons?
-</br></br></p></li>
-</ul>
-</div>
-</div>
-<div id="question-2" class="section level3">
-<h3>Question 2</h3>
-<p>In Durham County, NC, is the income of accepted loan applications different based on race?</p>
-<div id="step-1-1" class="section level4">
-<h4>Step 1</h4>
-<p>Here, I will change my output variable to reflect I am asking a new question: <code>{sql, connection=con, output.var=&quot;df.q2&quot;}</code>. Here we can ask SQL to turn the income variable to a numeric value we can average over using <code>CAST</code>. This will throw an error if we don’t remove the NA values from INCOME in our join.</p>
-<pre class="sql"><code>SELECT RACE1, AVG(CAST(INCOME AS NUMERIC))
-FROM hmda
-WHERE STATE=&#39;37&#39; AND COUNTY=&#39;063&#39; AND ACTIONTYPE = &#39;1&#39; AND INCOME &lt;&gt; &#39;NA&#39;
-GROUP BY RACE1;</code></pre>
-</div>
-<div id="step-2-1" class="section level4">
-<h4>Step 2</h4>
-<p>Now let’s plot the results of the SQL query. The code for the plot here is pretty similar to above, so I’ve hidden it this time.
-<img src="/post/blog1_files/figure-html/unnamed-chunk-5-1.png" width="672" /></p>
-</div>
-<div id="what-does-this-mean-1" class="section level4">
-<h4>What does this mean?</h4>
-<ul>
-<li><p>You’ll notice that Black applicants had the lowest average income in Durham County, NC, among accepted loan applications. This is a stark difference in the graph, and there is a lot more at play here that contributes to this disparity.</p></li>
-<li><p>However, though White applicants had the highest acceptance rate for loan applications, you’ll notice that they do not have the highest average income. In fact, the average income for the remaining racial groups is within 10k of each other.
-</br></br></p></li>
-</ul>
-</div>
-</div>
-<div id="why-am-i-doing-this" class="section level3">
-<h3>Why am I doing this?</h3>
-<p>I’ve been properly learning SQL through Coursera course (<a href="https://www.coursera.org/learn/analytics-mysql/">here</a>) this summer. A few years ago, I quickly loaded up some databases for a perception and decision making project I was doing simulations for, but in the hurry of trying to get out a finished product I didn’t have the time to properly learn the fundementals of the language. It turns out, it is quite useful (surprising no data scientist ever), especially when you start working with very large amounts of data. Obviously SQL databases are indispensible for many businesses in record keeping and other functions, but here I’m going to use them in a more exploratory research example when downloading data from Data.gov. There are a lot of rich, interesting datasets there, however, loading up a ~2.5Gb file in to R (or Python) seems excessive when I only need part of that dataset to answer the questions I’m interested in today.</p>
-<p>As a first pass – a little exercise outside of class – I logged on to Data.gov and just downloaded the first dataset I saw that seemed interesting; the 2008 Home Mortgage Disclosure Act (HMDA) Loan Application Register (LAR) Data (<a href="https://catalog.data.gov/dataset/2008-home-mortgage-disclosure-act-hmda-loan-application-register-lar-data">see</a>). For this example, I just quickly converted this massive csv into a database using PostgreSQL (<a href="https://www.postgresqltutorial.com/import-csv-file-into-posgresql-table/">see</a>). Though today I only asked simple questions using this data, if I want, I can keep building this database as I find and get more data from different sources. This allows me to store my gathered data in a much more dynamic framework, allowing for the addition of more datasets, without having a bunch of messy and weirdly named .csv files sitting in a folder. Open and well-kept data is good data.
+<h3 id="main-goal">Main Goal</h3>
+<p>The main goal today when building this webscraper is to load and collect relevant property record data from each parcel in Durham county, from the county website, and then input that data in to a <code>PostgreSQL</code> database. Below I will walk through each section of the code to do this.
 </br></br></p>
-</div>
-<div id="reading-list" class="section level3">
-<h3>Reading List</h3>
+<h4 id="step-1">Step 1</h4>
+<p>We need to import all the libraries we need for this project. I am using <code>Selenium</code> (
+<a href="https://selenium-python.readthedocs.io/" target="_blank" rel="noopener">link</a>), as the website I&rsquo;m scraping from needs to load up the webpage for us to eb able to scrape the information (link about that here). I also chose to use <code>psycopg2</code> (
+<a href="https://www.psycopg.org/docs/" target="_blank" rel="noopener">link</a>) to interact with the <code>PostgreSQL</code> database I created for this project. If you need to install <code>Selenium</code> ir <code>psycopg2</code>, it&rsquo;s pretty easy to do via <code>Anaconda</code> (
+<a href="https://www.anaconda.com/" target="_blank" rel="noopener">link</a>).</p>
+<pre><code class="language-python">####Import the libraries we need####
+import numpy as np
+from selenium import webdriver
+from bs4 import BeautifulSoup
+import time
+import re
+from selenium.webdriver.firefox.options import Options
+import psycopg2
+from psycopg2 import sql
+</code></pre>
+<p></br></br></p>
+<h4 id="step-2">Step 2</h4>
+<p>Once we have the libraries loaded up we are going to write the functions we need both to interact with the SQL database as well as scrape the data from the county website.</p>
+<p>In the SQL database I created, I have a table &ndash; <code>scrapeprog</code> &ndash; that contains all the url IDs and a status variable for each, currently set to 2 which will represent a &lsquo;pending&rsquo; status here. This first SQL call function is going to allow us to run the .py script without needing to give an input by querying the <code>scrapeprog</code> table in our SQL database to see which url ID we haven&rsquo;t tried to scrape yet.</p>
+<pre><code class="language-python">##To query what we need to scrape yet##
+def findsql():    
+    #Set up a connection to the PostgresSQL server we'll write data to
+    conn = psycopg2.connect(host=&quot;localhost&quot;,database=&quot;durhamprop&quot;, user=&quot;postgres&quot;, password=&quot;postgres&quot;)
+    cur = conn.cursor()
+    
+    #Write an sql query
+    query = sql.SQL(&quot;SELECT * FROM {table} WHERE {key} = 2 LIMIT 1&quot;).format(
+        table=sql.Identifier('scrapeprog'),
+        key=sql.Identifier('status'))
+    
+    #execute query
+    cur.execute(query)
+    return cur.fetchall()
+</code></pre>
+<p>The second SQL call function will allow us to insert and edit data in the SQL database.</p>
+<pre><code class="language-python">##To make sql calls to insert and change data##
+def callsql(command, data = None):
+    #Set up a connection to the PostgresSQL server we'll write data to
+    conn = psycopg2.connect(host=&quot;localhost&quot;,database=&quot;durhamprop&quot;, user=&quot;postgres&quot;, password=&quot;postgres&quot;)
+    cur = conn.cursor()
+    
+    #execute the query
+    if data == None:
+        cur.execute(command)
+    else:
+        cur.execute(command, data)
+    conn.commit()  
+</code></pre>
+<p>The third function I wrote allows us to load a webpage from the county&rsquo;s property records site and scrape the data we want to put in the SQL database</p>
+<pre><code class="language-python">##To scrape the data from each property##
+def getpropertydata(i):  
+    #Setp up the website we'll scrape data from
+    url = [&quot;https://property.spatialest.com/nc/durham/#/property/&quot;+str(i)]
+    
+    #Set up the Selenium web driver and then call the URL
+    options = Options()
+    options.headless = True #I don't want to open a physical window each tme
+    driver = webdriver.Firefox(options=options)
+    driver.get(url[0])
+    time.sleep(2) #Because we are loading the page, I wait a few seconds before the next command
+    
+    if driver.current_url == url[0]: #check the status isn't 404  or redirected before we scrape the info
+        #Parse the html
+        soup_ID = BeautifulSoup(driver.page_source, 'html.parser')
+        
+        #Find the key info (ki)
+        ki0 = re.findall(r'&gt;(.*?)&lt;', str(soup_ID.find(id = 'default_overview').findAll('span')[9]))[0] #landuse
+        ki1 = re.findall(r'&gt;(.*?)&lt;', str(soup_ID.find(id = 'default_overview').findAll('span')[13]))[0] #subdiv
+        ki2 = re.findall(r'&gt;(.*?)&lt;', str(soup_ID.find(id = 'default_overview').findAll('span')[21]))[0] #saledate
+        ki3 = re.findall(r'&gt;(.*?)&lt;', str(soup_ID.find(id = 'default_overview').findAll('span')[23]))[0] #saleprice
+        
+        #Find the buildinfo (bi)
+        bi0 = re.findall(r'&gt;(.*?)&lt;', str(soup_ID.find(id = 'default_buildings').findAll('span')[-1]))[0] #value
+        bi1 = re.findall(r'&gt;(.*?)&lt;', str(soup_ID.find(id = 'default_buildings').findAll('span')[4]))[0] #year built
+        bi2 = re.findall(r'&gt;(.*?)&lt;', str(soup_ID.find(id = 'default_buildings').findAll('span')[13]))[0] #area
+        bi3 = re.findall(r'&gt;(.*?)&lt;', str(soup_ID.find(id = 'default_buildings').findAll('span')[15]))[0] #bathrooms
+        bi4 = re.findall(r'&gt;(.*?)&lt;', str(soup_ID.find(id = 'default_buildings').findAll('span')[19]))[0] #bedrooms
+        bi5 = re.findall(r'&gt;(.*?)&lt;', str(soup_ID.find(id = 'default_buildings').findAll('span')[8]))[0] #use
+        bi6 = re.findall(r'&gt;(.*?)&lt;', str(soup_ID.find(id = 'default_buildings').findAll('span')[6]))[0] #builduse
+
+        #Find the assessment details (ad)
+        ad0 = re.findall(r'&gt;(.*?)&lt;', str(soup_ID.find(id = 'LandDetails').findAll('td')[0]))[0] #fair market value
+        ad1 = re.findall(r'&gt;(.*?)&lt;', str(soup_ID.find(id = 'LandDetails').findAll('td')[1]))[0] #land assessed value
+        ad2 = re.findall(r'&gt;(.*?)&lt;', str(soup_ID.find(id = 'LandDetails').findAll('td')[2]))[0] #acres
+        ad3 = re.findall(r'&gt;(.*?)&lt;', str(soup_ID.find(id = 'default_overview').findAll('span')[-3]))[0] #improvement
+        ad4 = re.findall(r'&gt;(.*?)&lt;', str(soup_ID.find(id = 'default_overview').findAll('span')[-1]))[0] #totalfmv
+        
+        #write sql code to insert
+        sqltemp_ki = &quot;&quot;&quot;INSERT INTO keyinfo(landuse,subdiv,saledate,saleprice,id)
+             VALUES(%s,%s,%s,%s,%s);&quot;&quot;&quot;
+        
+        sqltemp_bi = &quot;&quot;&quot;INSERT INTO buildinfo(value,year,area,bathrooms,bedrooms,use,builduse,id)
+             VALUES(%s,%s,%s,%s,%s,%s,%s,%s);&quot;&quot;&quot;
+        
+        sqltemp_ad = &quot;&quot;&quot;INSERT INTO assessment(fmv,lav,acres,improvement,totalfmv,id)
+             VALUES(%s,%s,%s,%s,%s,%s);&quot;&quot;&quot;
+        
+        #insert data in to sql
+        callsql(sqltemp_ki, [ki0,ki1,ki2,ki3,i])
+        callsql(sqltemp_bi, [bi0,bi1,bi2,bi3,bi4,bi5,bi6,i])
+        callsql(sqltemp_ad, [ad0,ad1,ad2,ad3,ad4,i])
+    
+    driver.quit()  
+</code></pre>
+<p></br></br></p>
+<h4 id="step-3">Step 3</h4>
+<p>Now we are ready to run these functions and start collecting some data to put in to our database for later.</p>
+<p>Before we start, we are going to define to sql queries to update the status in out <code>scrapeprog</code> table, to let us know if we scraped the data successfully or not.</p>
+<pre><code class="language-python">##Define the calls for if we sucessfully/un scrape data##
+
+#Update the ID status to 1 = success
+sqlsuccess = sql.SQL(&quot;UPDATE scrapeprog SET status = 1 WHERE id = ({})&quot;).format(sql.Literal(str(j[0])))
+
+#Update the ID status to 0 = fail
+sqlfail = sql.SQL(&quot;UPDATE scrapeprog SET status = 0 WHERE id = ({})&quot;).format(sql.Literal(str(j[0])))
+</code></pre>
+<p>Now we run the <code>getpropertydata()</code> function in a while loop until there are no &lsquo;pending&rsquo; ID values in the <code>scrapeprog</code> SQL table.</p>
+<pre><code class="language-python">##Run this in a while loop until it cant run no more!##
+while findsql()[0][1] == 2: #i.e. while status is pending = 2
+    j = findsql()[0] #where the 0th index is the id, and the 1st is the status
+    try:
+        getpropertydata(j[0]) 
+        callsql(sqlsuccess)
+    except:
+        print(j[0]) #just a nice visual as we go
+        callsql(sqlfail)  
+</code></pre>
+<p></br></br></p>
+<h3 id="future-uses">Future Uses</h3>
+<p>In another blog post sometime, I am going to use the data I collected to run an isolation forest algorithm to detect outliers in the assessment value of each property, based on the features of each property. These outliers could be due to errors in data input (the county website has a disclaimer regarding this), human error in the assessment of a property, or particularly odd properties that have unknown features not captured in the property tax records.</p>
+<p>I also hope to find a few more uses for this information, likely involving predicting sales data for properties or determining what features of a property (i.e. bedrooms, bathrooms, acreage, etc) increase its value the most. These are just some rough ideas though.
+</br></br></p>
+<h3 id="reading-list">Reading List</h3>
+<h4 id="ethical-issues">Ethical Issues</h4>
 <ul>
-<li><a href="https://link.springer.com/chapter/10.1007/978-3-030-11711-5_11">A Loan at Last? Race and Racism in Mortgage Lending</a></li>
-<li><a href="https://www.tandfonline.com/doi/full/10.1080/10511482.2017.1341944?casa_token=b3GMq9t6wLsAAAAA%3AaLUQuyPbjXkI9KXZib0FAg91qA74Hw2YDADejjIrmm90o_XqGeYkAJG6wKM-L1F6g0SiD16me7MX">Segregation and the Geography of Creditworthiness: Racial Inequality in a Recovered Mortgage Market</a></li>
-<li><a href="https://www.questia.com/library/journal/1G1-484628739/residential-mortgage-lending-from-2004-to-2015-evidence">Residential Mortgage Lending from 2004 to 2015: Evidence from the Home Mortgage Disclosure Act Data</a></li>
-<li><a href="https://www.jstor.org/stable/26590562?seq=1#metadata_info_tab_contents">Big Data and Discrimination</a></li>
+<li>
+<a href="https://towardsdatascience.com/ethics-in-web-scraping-b96b18136f01" target="_blank" rel="noopener">Ethics in Web Scraping</a></li>
+<li>
+<a href="https://www.apa.org/ethics/code/code-1992" target="_blank" rel="noopener">Ethical Principles of Psychologists and Code of Conduct</a></li>
+<li>
+<a href="https://link.springer.com/article/10.1023/B:ETIN.0000047476.05912.3d" target="_blank" rel="noopener">Ethical issues in web data mining</a></li>
 </ul>
-</div>
+<h4 id="technical-reading">Technical Reading</h4>
+<ul>
+<li>
+<a href="https://www.postgresqltutorial.com/postgresql-python/" target="_blank" rel="noopener">PostgreSQL in Python</a></li>
+<li>
+<a href="https://realpython.com/beautiful-soup-web-scraper-python/" target="_blank" rel="noopener">Beautiful Soup: Build a Web Scraper With Python</a></li>
+<li>
+<a href="https://levelup.gitconnected.com/web-scraping-with-selenium-in-python-8fde2f0fd559" target="_blank" rel="noopener">Web Scraping with Selenium in Python</a></li>
+</ul>
 
     </div>
 
@@ -786,15 +836,17 @@ GROUP BY RACE1;</code></pre>
 
 <div class="article-tags">
   
+  <a class="badge badge-light" href="/tag/housing/">housing</a>
+  
+  <a class="badge badge-light" href="/tag/multi-part-blog/">multi-part blog</a>
+  
+  <a class="badge badge-light" href="/tag/postgresql/">PostgreSQL</a>
+  
+  <a class="badge badge-light" href="/tag/python/">python</a>
+  
   <a class="badge badge-light" href="/tag/sql/">SQL</a>
   
-  <a class="badge badge-light" href="/tag/hmda/">HMDA</a>
-  
-  <a class="badge badge-light" href="/tag/linear-model/">linear model</a>
-  
-  <a class="badge badge-light" href="/tag/postgres/">Postgres</a>
-  
-  <a class="badge badge-light" href="/tag/r/">R</a>
+  <a class="badge badge-light" href="/tag/webscraping/">webscraping</a>
   
 </div>
 
@@ -811,7 +863,7 @@ GROUP BY RACE1;</code></pre>
       
       
       <li>
-        <a href="https://twitter.com/intent/tweet?url=/post/blog1/&amp;text=HMDA%20Loan%20Application%20-%20An%20SQL%20exercise" target="_blank" rel="noopener" class="share-btn-twitter">
+        <a href="https://twitter.com/intent/tweet?url=/post/blog2/&amp;text=Scraping%20Durham%20Property%20Records:%20Part%20I" target="_blank" rel="noopener" class="share-btn-twitter">
           <i class="fab fa-twitter"></i>
         </a>
       </li>
@@ -824,7 +876,7 @@ GROUP BY RACE1;</code></pre>
       
       
       <li>
-        <a href="mailto:?subject=HMDA%20Loan%20Application%20-%20An%20SQL%20exercise&amp;body=/post/blog1/" target="_blank" rel="noopener" class="share-btn-email">
+        <a href="mailto:?subject=Scraping%20Durham%20Property%20Records:%20Part%20I&amp;body=/post/blog2/" target="_blank" rel="noopener" class="share-btn-email">
           <i class="fas fa-envelope"></i>
         </a>
       </li>
@@ -837,7 +889,7 @@ GROUP BY RACE1;</code></pre>
       
       
       <li>
-        <a href="https://www.linkedin.com/shareArticle?url=/post/blog1/&amp;title=HMDA%20Loan%20Application%20-%20An%20SQL%20exercise" target="_blank" rel="noopener" class="share-btn-linkedin">
+        <a href="https://www.linkedin.com/shareArticle?url=/post/blog2/&amp;title=Scraping%20Durham%20Property%20Records:%20Part%20I" target="_blank" rel="noopener" class="share-btn-linkedin">
           <i class="fab fa-linkedin-in"></i>
         </a>
       </li>
@@ -972,7 +1024,7 @@ GROUP BY RACE1;</code></pre>
     <h3>Related</h3>
     <ul>
       
-      <li><a href="/post/blog2/">Scraping Durham Property Records: Part I</a></li>
+      <li><a href="/post/blog1/">HMDA Loan Application - An SQL exercise</a></li>
       
     </ul>
   </div>
