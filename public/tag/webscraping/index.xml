@@ -29,7 +29,7 @@
 &lt;/br&gt;&lt;/br&gt;&lt;/p&gt;
 &lt;div id=&#34;step-1&#34; class=&#34;section level4&#34;&gt;
 &lt;h4&gt;Step 1&lt;/h4&gt;
-&lt;p&gt;We need to import all the libraries we need for this project. I am using &lt;code&gt;Selenium&lt;/code&gt; (&lt;a href=&#34;https://selenium-python.readthedocs.io/&#34;&gt;link&lt;/a&gt;), as the website I’m scraping from needs to load up the webpage for us to eb able to scrape the information (link about that here). I also chose to use &lt;code&gt;psycopg2&lt;/code&gt; (&lt;a href=&#34;https://www.psycopg.org/docs/&#34;&gt;link&lt;/a&gt;) to interact with the &lt;code&gt;PostgreSQL&lt;/code&gt; database I created for this project. If you need to install &lt;code&gt;Selenium&lt;/code&gt; ir &lt;code&gt;psycopg2&lt;/code&gt;, it’s pretty easy to do via &lt;code&gt;Anaconda&lt;/code&gt; (&lt;a href=&#34;https://www.anaconda.com/&#34;&gt;link&lt;/a&gt;).&lt;/p&gt;
+&lt;p&gt;We need to import all the libraries we need for this project. I am using &lt;code&gt;Selenium&lt;/code&gt; (&lt;a href=&#34;https://selenium-python.readthedocs.io/&#34;&gt;link&lt;/a&gt;), as the website I’m scraping from needs to load up the webpage for us to scrape the information. I also chose to use &lt;code&gt;psycopg2&lt;/code&gt; (&lt;a href=&#34;https://www.psycopg.org/docs/&#34;&gt;link&lt;/a&gt;) to interact with the &lt;code&gt;PostgreSQL&lt;/code&gt; database I created for this project. If you need to install &lt;code&gt;Selenium&lt;/code&gt; or &lt;code&gt;psycopg2&lt;/code&gt;, it’s pretty easy to do via &lt;code&gt;Anaconda&lt;/code&gt; (&lt;a href=&#34;https://www.anaconda.com/&#34;&gt;link&lt;/a&gt;).&lt;/p&gt;
 &lt;pre class=&#34;python&#34;&gt;&lt;code&gt;####Import the libraries we need####
 import numpy as np
 from selenium import webdriver
@@ -175,6 +175,7 @@ while findsql()[0][1] == 2: #i.e. while status is pending = 2
 &lt;li&gt;&lt;a href=&#34;https://www.postgresqltutorial.com/postgresql-python/&#34;&gt;PostgreSQL in Python&lt;/a&gt;&lt;/li&gt;
 &lt;li&gt;&lt;a href=&#34;https://realpython.com/beautiful-soup-web-scraper-python/&#34;&gt;Beautiful Soup: Build a Web Scraper With Python&lt;/a&gt;&lt;/li&gt;
 &lt;li&gt;&lt;a href=&#34;https://levelup.gitconnected.com/web-scraping-with-selenium-in-python-8fde2f0fd559&#34;&gt;Web Scraping with Selenium in Python&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://opensource.com/article/20/5/web-scraping-python&#34;&gt;A beginner’s guide to web scraping with Python&lt;/a&gt;&lt;/li&gt;
 &lt;/ul&gt;
 &lt;/div&gt;
 &lt;/div&gt;

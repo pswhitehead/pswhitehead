@@ -15,7 +15,7 @@ The main goal today when building this webscraper is to load and collect relevan
 </br></br>
 
 #### Step 1
-We need to import all the libraries we need for this project. I am using `Selenium` ([link](https://selenium-python.readthedocs.io/)), as the website I'm scraping from needs to load up the webpage for us to eb able to scrape the information (link about that here). I also chose to use `psycopg2` ([link](https://www.psycopg.org/docs/)) to interact with the `PostgreSQL` database I created for this project. If you need to install `Selenium` ir `psycopg2`, it's pretty easy to do via `Anaconda` ([link](https://www.anaconda.com/)).
+We need to import all the libraries we need for this project. I am using `Selenium` ([link](https://selenium-python.readthedocs.io/)), as the website I'm scraping from needs to load up the webpage for us to scrape the information. I also chose to use `psycopg2` ([link](https://www.psycopg.org/docs/)) to interact with the `PostgreSQL` database I created for this project. If you need to install `Selenium` or `psycopg2`, it's pretty easy to do via `Anaconda` ([link](https://www.anaconda.com/)).
 
 ```python
 ####Import the libraries we need####
@@ -176,3 +176,4 @@ I also hope to find a few more uses for this information, likely involving predi
 * [PostgreSQL in Python](https://www.postgresqltutorial.com/postgresql-python/)
 * [Beautiful Soup: Build a Web Scraper With Python](https://realpython.com/beautiful-soup-web-scraper-python/)
 * [Web Scraping with Selenium in Python](https://levelup.gitconnected.com/web-scraping-with-selenium-in-python-8fde2f0fd559)
+* [A beginner's guide to web scraping with Python](https://opensource.com/article/20/5/web-scraping-python)

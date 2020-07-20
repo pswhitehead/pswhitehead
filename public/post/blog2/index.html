@@ -674,7 +674,7 @@
 </br></br></p>
 <div id="step-1" class="section level4">
 <h4>Step 1</h4>
-<p>We need to import all the libraries we need for this project. I am using <code>Selenium</code> (<a href="https://selenium-python.readthedocs.io/">link</a>), as the website I’m scraping from needs to load up the webpage for us to eb able to scrape the information (link about that here). I also chose to use <code>psycopg2</code> (<a href="https://www.psycopg.org/docs/">link</a>) to interact with the <code>PostgreSQL</code> database I created for this project. If you need to install <code>Selenium</code> ir <code>psycopg2</code>, it’s pretty easy to do via <code>Anaconda</code> (<a href="https://www.anaconda.com/">link</a>).</p>
+<p>We need to import all the libraries we need for this project. I am using <code>Selenium</code> (<a href="https://selenium-python.readthedocs.io/">link</a>), as the website I’m scraping from needs to load up the webpage for us to scrape the information. I also chose to use <code>psycopg2</code> (<a href="https://www.psycopg.org/docs/">link</a>) to interact with the <code>PostgreSQL</code> database I created for this project. If you need to install <code>Selenium</code> or <code>psycopg2</code>, it’s pretty easy to do via <code>Anaconda</code> (<a href="https://www.anaconda.com/">link</a>).</p>
 <pre class="python"><code>####Import the libraries we need####
 import numpy as np
 from selenium import webdriver
@@ -820,6 +820,7 @@ while findsql()[0][1] == 2: #i.e. while status is pending = 2
 <li><a href="https://www.postgresqltutorial.com/postgresql-python/">PostgreSQL in Python</a></li>
 <li><a href="https://realpython.com/beautiful-soup-web-scraper-python/">Beautiful Soup: Build a Web Scraper With Python</a></li>
 <li><a href="https://levelup.gitconnected.com/web-scraping-with-selenium-in-python-8fde2f0fd559">Web Scraping with Selenium in Python</a></li>
+<li><a href="https://opensource.com/article/20/5/web-scraping-python">A beginner’s guide to web scraping with Python</a></li>
 </ul>
 </div>
 </div>
@@ -1152,6 +1153,16 @@ while findsql()[0][1] == 2: #i.e. while status is pending = 2
   
   <div class="container">
     <footer class="site-footer">
+  
+  <p class="powered-by">
+    
+      <a href="/privacy/">Privacy Policy</a>
+    
+    
+       &middot; 
+      <a href="/terms/">Terms</a>
+    
+  </p>
   
 
   <p class="powered-by">
