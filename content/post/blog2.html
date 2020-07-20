@@ -123,20 +123,20 @@ def getpropertydata(i):
 <pre class="python"><code>##Define the calls for if we sucessfully/un scrape data##
 
 #Update the ID status to 1 = success
-sqlsuccess = sql.SQL(&quot;UPDATE scrapeprog SET status = 1 WHERE id = ({})&quot;).format(sql.Literal(str(j[0])))
+sqlsuccess = sql.SQL(&quot;UPDATE scrapeprog SET status = 1 WHERE id = ({})&quot;)
 
 #Update the ID status to 0 = fail
-sqlfail = sql.SQL(&quot;UPDATE scrapeprog SET status = 0 WHERE id = ({})&quot;).format(sql.Literal(str(j[0])))</code></pre>
+sqlfail = sql.SQL(&quot;UPDATE scrapeprog SET status = 0 WHERE id = ({})&quot;)</code></pre>
 <p>Now we run the <code>getpropertydata()</code> function in a while loop until there are no ‘pending’ ID values in the <code>scrapeprog</code> SQL table.</p>
 <pre class="python"><code>##Run this in a while loop until it cant run no more!##
 while findsql()[0][1] == 2: #i.e. while status is pending = 2
     j = findsql()[0] #where the 0th index is the id, and the 1st is the status
     try:
         getpropertydata(j[0]) 
-        callsql(sqlsuccess)
+        callsql(sqlsuccess.format(sql.Literal(str(j[0]))))
     except:
         print(j[0]) #just a nice visual as we go
-        callsql(sqlfail)  </code></pre>
+        callsql(sqlfail.format(sql.Literal(str(j[0])))) </code></pre>
 <p></br></br></p>
 </div>
 </div>

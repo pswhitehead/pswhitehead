@@ -138,10 +138,10 @@ Before we start, we are going to define to sql queries to update the status in o
 ##Define the calls for if we sucessfully/un scrape data##
 
 #Update the ID status to 1 = success
-sqlsuccess = sql.SQL("UPDATE scrapeprog SET status = 1 WHERE id = ({})").format(sql.Literal(str(j[0])))
+sqlsuccess = sql.SQL("UPDATE scrapeprog SET status = 1 WHERE id = ({})")
 
 #Update the ID status to 0 = fail
-sqlfail = sql.SQL("UPDATE scrapeprog SET status = 0 WHERE id = ({})").format(sql.Literal(str(j[0])))
+sqlfail = sql.SQL("UPDATE scrapeprog SET status = 0 WHERE id = ({})")
 ```
 
 Now we run the `getpropertydata()` function in a while loop until there are no 'pending' ID values in the `scrapeprog` SQL table.
@@ -152,10 +152,10 @@ while findsql()[0][1] == 2: #i.e. while status is pending = 2
     j = findsql()[0] #where the 0th index is the id, and the 1st is the status
     try:
         getpropertydata(j[0]) 
-        callsql(sqlsuccess)
+        callsql(sqlsuccess.format(sql.Literal(str(j[0]))))
     except:
         print(j[0]) #just a nice visual as we go
-        callsql(sqlfail)  
+        callsql(sqlfail.format(sql.Literal(str(j[0])))) 
 ```
 </br></br>
 
