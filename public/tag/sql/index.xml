@@ -155,8 +155,8 @@ while findsql()[0][1] == 2: #i.e. while status is pending = 2
 &lt;/div&gt;
 &lt;div id=&#34;future-uses&#34; class=&#34;section level3&#34;&gt;
 &lt;h3&gt;Future Uses&lt;/h3&gt;
-&lt;p&gt;In another blog post sometime, I am going to use the data I collected to run an isolation forest algorithm to detect outliers in the assessment value of each property, based on the features of each property. These outliers could be due to errors in data input (the county website has a disclaimer regarding this), human error in the assessment of a property, or particularly odd properties that have unknown features not captured in the property tax records.&lt;/p&gt;
-&lt;p&gt;I also hope to find a few more uses for this information, likely involving predicting sales data for properties or determining what features of a property (i.e. bedrooms, bathrooms, acreage, etc) increase its value the most. These are just some rough ideas though.
+&lt;p&gt;In another blog post sometime, I am going to use the data I collected to run an isolation forest algorithm to detect outlier properties in Durham. These outliers could be due to errors in data input (the county website has a disclaimer regarding this), human error in the assessment or data input for this property, or particularly odd features of a parcel. More on this later.&lt;/p&gt;
+&lt;p&gt;I also hope to find a few more uses for this information, maybe involving predicting sales data for properties or determining what features of a property (i.e. bedrooms, bathrooms, acreage, etc) increase its value the most. These are just some rough ideas though.
 &lt;/br&gt;&lt;/br&gt;&lt;/p&gt;
 &lt;/div&gt;
 &lt;div id=&#34;reading-list&#34; class=&#34;section level3&#34;&gt;
