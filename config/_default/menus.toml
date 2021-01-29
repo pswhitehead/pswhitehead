@@ -37,3 +37,7 @@
     name = "CV"
     url = "https://www.dropbox.com/s/df4djv0j3966e22/Resume_Whitehead%20%5BJanuary21%5D.docx?dl=0"
     weight = 80
+ [[main]]
+    name = "Teaching Statement"
+    url = "https://www.dropbox.com/s/k5ftruo4xznkeqy/TeachingStatement.docx?dl=0"
+    weight = 90
