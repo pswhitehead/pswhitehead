@@ -8,10 +8,10 @@
   url = "#about"
   weight = 10
 
-[[main]]
-  name = "Posts"
-  url = "#posts"
-  weight = 20
+#[[main]]
+ #name = "Posts"
+  #url = "#posts"
+  #weight = 20
 
 [[main]]
   name = "Research"
@@ -37,7 +37,3 @@
     name = "CV"
     url = "https://www.dropbox.com/s/bit0xd90lx1kg30/CV%20%5BJan21%5D.docx?dl=0"
     weight = 80
- [[main]]
-    name = "Teaching Statement"
-    url = "https://www.dropbox.com/s/k5ftruo4xznkeqy/TeachingStatement.docx?dl=0"
-    weight = 90
