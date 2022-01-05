@@ -14,6 +14,8 @@ header:
   image: ""
 ---
 
+The below list is a selection. Please see [Google Scholar](https://scholar.google.com/citations?user=zLLrwMkAAAAJ&hl=en) for the complete list.
+
 ### Human Perception and Performance
   How do you avoid accidents while driving? How do you make the right decision when it matters? I use behavior and eye tracking methods to better understand these behaviors, specifically focussing on how people learn to successfully and automatically implement context-appropriate behavior.
 <br/><br/> 
@@ -40,5 +42,3 @@ Selected Publications:
   * Whitehead, P.S., Brewer, G.A., Blais, C. (2020). Reliability and Convergence of Conflict Effects: An Examination of Evidence for Domain-General Attentional Control. Experimental Psychology. [GET PDF](https://www.dropbox.com/s/cm2rr8xnrfio43g/Whitehead%20et%20al.%20-%202020%20-%20Reliability%20and%20Convergence%20of%20Conflict%20Effects%20A.pdf?dl=0)
   * Whitehead, P.S., Brewer, G.A., Blais, C. (2018). Are cognitive control processes reliable?. Journal of Experimental Psychology: Learning, Memory, and Cognition. [GET PDF](https://www.dropbox.com/s/9xrfm6qtsr35yei/Whitehead%20et%20al.%20-%202018%20-%20Are%20cognitive%20control%20processes%20reliable.pdf?dl=0)
 <br/><br/>
-
-The above list is a selection. Please see [Google Scholar](https://scholar.google.com/citations?user=zLLrwMkAAAAJ&hl=en) for the complete list of my published works.
