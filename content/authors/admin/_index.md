@@ -18,11 +18,11 @@ organizations:
   url: ""
 
 # Short bio (displayed in user profile at end of posts)
-bio: I am Peter Whitehead, MA, a cognitive psychologist and neuroscientist who specializes in using an interdisciplinary approach to deliver actionable insights into human behavior and decision making.
+bio: I am Peter Whitehead, PhD, a cognitive psychologist who specializes in using an interdisciplinary approach to deliver actionable insights into human behavior and decision making.
 
 education:
   courses:
-  - course: PhD in Psychology (Cognition and Cognitive Neuroscience)
+  - course: PhD in Psychology and Neuroscience
     institution: Duke University
     year: 2021
   - course: MA in Psychology
@@ -65,8 +65,8 @@ user_groups:
 - Visitors
 ---
 
-I specialize in using an interdisciplinary approach to deliver actionable insights into human behavior and decision making. As a PhD researcher, I primarily focused on the basic processes of human performance, attention, and memory. 
+I specialize in using an interdisciplinary approach to deliver actionable insights into human behavior and decision making. As a PhD researcher, I primarily focused on the basic processes of human performance, attention, and memory. As a Post-Doctoral Associate, my current work focuses on (1) how to help people make better choices when they are learning new information or skills, and (2) topics in belief revision, especially as it relates to combating misinformation.
 
-I am highly proficient in different methodologies for experimental design and collection (EEG, eye tracking, individual differences, fMRI, online behavioral assessment) and the creation of custom pipelines for the analysis and interpretation of data using various techniques (hierarchical modeling, multivariate decoding, signal processing, Bayesian analysis). 
+I am highly proficient in different methodologies for experimental design and collection (individual differences, online behavioral assessment, EEG, eye tracking) and the creation of custom pipelines for the analysis and interpretation of data using various techniques (hierarchical modeling, multivariate decoding, signal processing). 
 
-My work has been featured in top-tier academic journals such as the Journal of Cognitive Neuroscience and Cognition.
+My work has been featured in top-tier academic journals such as Cognition, Psychonomic Bulletin & Report, Journal of Experimental Social Psychology, and Journal of Consumer Psychology.
