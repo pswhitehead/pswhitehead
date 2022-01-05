@@ -10,7 +10,7 @@ authors:
 superuser: true
 
 # Role/position
-role: Cognitive Psychologist and Neuroscientist
+role: Cognitive Psychologist
 
 # Organizations/Affiliations
 organizations:
