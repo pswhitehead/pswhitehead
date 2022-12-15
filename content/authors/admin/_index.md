@@ -10,7 +10,7 @@ authors:
 superuser: true
 
 # Role/position
-role: Cognitive Psychologist
+role: Behavioral Scientist
 
 # Organizations/Affiliations
 organizations:
@@ -18,11 +18,11 @@ organizations:
   url: ""
 
 # Short bio (displayed in user profile at end of posts)
-bio: I am Peter Whitehead, PhD, a cognitive psychologist who specializes in using an interdisciplinary approach to deliver actionable insights into human behavior and decision making.
+bio: I am Peter Whitehead, PhD, a behavioral who specializes in using an interdisciplinary approach to deliver actionable insights into human behavior and decision making.
 
 education:
   courses:
-  - course: PhD in Psychology and Neuroscience
+  - course: PhD in Psychology (Cognition and Cognitive Neuroscience)
     institution: Duke University
     year: 2021
   - course: MA in Psychology
@@ -42,7 +42,7 @@ social:
   link: mailto:peter@pswhitehead.com .
 - icon: twitter
   icon_pack: fab
-  link: https://twitter.com/ps_whitehead
+  link: https://mastodon.online/@pswhitehead
 - icon: google-scholar
   icon_pack: ai
   link: https://scholar.google.com/citations?user=zLLrwMkAAAAJ&hl=en&oi=ao
@@ -65,8 +65,8 @@ user_groups:
 - Visitors
 ---
 
-I specialize in using an interdisciplinary approach to deliver actionable insights into human behavior and decision making. As a PhD researcher, I primarily focused on the basic processes of human performance, attention, and memory. As a Post-Doctoral Associate, my current work focuses on (1) how to help people make better choices when they are learning new information or skills, and (2) topics in belief revision, especially as it relates to combating misinformation.
+I specialize in using an interdisciplinary approach to deliver actionable insights into human behavior and decision making. My research has focused on the basic processes of human performance, attention, and memory. My current work focuses on (1) how to help people make better choices when they are learning new information or skills, and (2) user designs for public health campaigns combating misinformation.
 
-I am highly proficient in different methodologies for experimental design and collection (individual differences, online behavioral assessment, EEG, eye tracking) and the creation of custom pipelines for the analysis and interpretation of data using various techniques (hierarchical modeling, multivariate decoding, signal processing). 
+I am highly proficient in different methodologies for quantitative/qualitative research (experimental design and survey construction, online assessments, EEG, eye tracking) and the creation of custom pipelines for the analysis and interpretation of data using various techniques (hierarchical modeling, multivariate decoding, A/B testing, machine learning, non-parametric statistics). 
 
-My work has been featured in top-tier academic journals such as Cognition, Psychonomic Bulletin & Report, Journal of Experimental Social Psychology, and Journal of Consumer Psychology.
+My work has been featured in academic journals such as Cognition, Psychonomic Bulletin & Report, Journal of Experimental Social Psychology, and Journal of Consumer Psychology.
