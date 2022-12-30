@@ -65,7 +65,7 @@ user_groups:
 - Visitors
 ---
 
-I specialize in using an interdisciplinary approach to deliver actionable insights into human behavior and decision making. My research has focused on the basic processes of human performance, attention, and memory. My current work focuses on (1) how to help people make better choices when they are learning new information or skills, and (2) user designs for public health campaigns combating misinformation.
+I specialize in using an interdisciplinary approach to deliver actionable insights into human behavior and decision making. My current work focuses on (1) how to help people make better choices when they are learning new information or skills, and (2) user design research for public health campaigns combating misinformation. I also have done research on the basic processes of human performance, attention, and memory.
 
 I am highly proficient in different methodologies for quantitative/qualitative research (experimental design and survey construction, online assessments, EEG, eye tracking) and the creation of custom pipelines for the analysis and interpretation of data using various techniques (hierarchical modeling, multivariate decoding, A/B testing, machine learning, non-parametric statistics). 
 
