@@ -31,9 +31,9 @@
 # To enable, copy your resume/CV to `static/files/cv.pdf` and uncomment the lines below.
  [[main]]
     name = "Resume"
-    url = "https://www.dropbox.com/s/usmxmm3x0yeyr17/Resume%20Beh%20%5Bcurrent%5D.pdf?dl=0"
+    url = "https://pswhitehead.com/post/Resume.pdf"
     weight = 70
  [[main]]
     name = "CV"
-    url = "https://www.dropbox.com/s/t7ykwoaaqfm2u7p/CV%20%5Bcurrent%5D.pdf?dl=0"
+    url = "https://pswhitehead.com/post/CV.pdf"
     weight = 80
